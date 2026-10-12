@@ -38,9 +38,9 @@ export function pageStatus(page) {
 
 /**
  * Schreibt die Übersetzung; das Original wird nur beim ersten Mal gesichert.
- * measure = Zeichenzahlen der Anfrage, usage = echte Tokens (für die Kalibrierung der Schätzung).
+ * measure = Zeichenzahlen der Anfrage, usage = echte Tokens, duration = Sekunden (für Kosten- und Zeitschätzung).
  */
-export async function saveTranslation(page, html, { model, failed, usage, measure }) {
+export async function saveTranslation(page, html, { model, failed, usage, measure, duration }) {
   await page.update({
     "text.content": html,
     [`flags.${MODULE_ID}.${FLAG}`]: {
@@ -49,6 +49,7 @@ export async function saveTranslation(page, html, { model, failed, usage, measur
       model,
       usage,
       measure,
+      duration,
       translatedAt: Date.now()
     }
   });

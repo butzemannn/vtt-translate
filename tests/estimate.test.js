@@ -38,3 +38,13 @@ test("Schätzung für die Samples liegt in plausibler Größenordnung", () => {
   assert.ok(totals.words > 10000 && totals.words < 20000, `Wörter: ${totals.words}`);
   assert.ok(opus > 0.3 && opus < 3, `Opus: ${opus.toFixed(2)} $`);
 });
+
+test("Zeitschätzung aus gemessenen Seiten, parallel geteilt", async () => {
+  const { estimateSeconds, formatDuration } = await import("../scripts/estimate.js");
+  const s = { measure: { outputChars: 1000 }, duration: 20 };
+  assert.equal(estimateSeconds(3000, [s, s], 3), null, "zu wenig Messdaten");
+  assert.equal(estimateSeconds(3000, [s, s, s], 3), 20);
+  assert.equal(formatDuration(20), "< 1 Min.");
+  assert.equal(formatDuration(12 * 60), "12 Min.");
+  assert.equal(formatDuration(65 * 60), "1 Std. 5 Min.");
+});

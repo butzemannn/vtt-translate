@@ -1,9 +1,10 @@
 // Übersetzungs-Zentrale: alle Journale mit Status, Auswahl, Kostenschätzung und Batch-Steuerung.
 import { MODULE_ID, pageStatus, getOriginal, getTranslation } from "../store.js";
 import { measureHtml } from "../translator.js";
-import { loadPrices, calibrate, estimateCost, toOpenRouterId, COMPARE_MODELS } from "../estimate.js";
+import { loadPrices, calibrate, estimateCost, estimateSeconds, formatDuration, toOpenRouterId, COMPARE_MODELS } from "../estimate.js";
 import { buildRows, STATUS } from "./rows.js";
 import { pageContext, restorePage } from "../actions.js";
+import { CONCURRENCY } from "../queue.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 const TEMPLATES = `modules/${MODULE_ID}/templates/center`;
@@ -69,17 +70,26 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
 
     const filters = ["all", ...Object.keys(STATUS)].map(value => ({ value, label: value === "all" ? game.i18n.localize("VTTTRANSLATE.Center.FilterAll") : statusLabel(value), selected: value === this.filter }));
     const q = this.queue;
+    const samples = this.#translatedFlags();
+    // Restzeit: laufende Seiten zur Hälfte, wartende voll.
+    const remainingChars = q.pending.reduce((sum, u) => sum + (this.#measure(fromUuidSync(u))?.outputChars ?? 0), 0)
+      + [...q.active].reduce((sum, u) => sum + (this.#measure(fromUuidSync(u))?.outputChars ?? 0) / 2, 0);
+    const eta = q.running && !q.paused ? estimateSeconds(remainingChars, samples, CONCURRENCY) : null;
     return {
       rows,
       filters,
       search: this.search,
-      summary: await this.#summary(),
-      queue: { running: q.running, paused: q.paused, hasPending: q.pending.length > 0, done: q.done, total: q.total, percent: q.total ? Math.round((q.done / q.total) * 100) : 0, errors: q.errors.size }
+      summary: await this.#summary(samples),
+      queue: { running: q.running, paused: q.paused, hasPending: q.pending.length > 0, done: q.done, total: q.total, percent: q.total ? Math.round((q.done / q.total) * 100) : 0, errors: q.errors.size, eta: eta === null ? null : formatDuration(eta) }
     };
   }
 
-  /** Anzahl, Wörter und Kosten der Auswahl. */
-  async #summary() {
+  #translatedFlags() {
+    return game.journal.contents.flatMap(e => e.pages.contents).map(getTranslation).filter(Boolean);
+  }
+
+  /** Anzahl, Wörter, Kosten und Dauer der Auswahl. */
+  async #summary(samples) {
     const totals = { inputChars: 0, outputChars: 0, words: 0 };
     for (const uuid of this.selected) {
       const m = this.#measure(fromUuidSync(uuid));
@@ -89,8 +99,8 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
       totals.words += m.words;
     }
 
-    const translated = game.journal.contents.flatMap(e => e.pages.contents).map(getTranslation).filter(Boolean);
-    const rate = calibrate(translated);
+    const rate = calibrate(samples);
+    const seconds = estimateSeconds(totals.outputChars, samples, CONCURRENCY);
     const current = toOpenRouterId(game.settings.get(MODULE_ID, "provider"), game.settings.get(MODULE_ID, "model"));
     let costs = [];
     try {
@@ -101,7 +111,7 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
     } catch (err) {
       console.warn(`${MODULE_ID} | Preise nicht ladbar`, err);
     }
-    return { pages: this.selected.size, words: totals.words.toLocaleString(), costs, calibrated: rate.calibrated, samples: rate.count };
+    return { pages: this.selected.size, words: totals.words.toLocaleString(), costs, calibrated: rate.calibrated, samples: rate.count, time: seconds === null ? null : formatDuration(seconds) };
   }
 
   #measure(page) {
@@ -114,7 +124,15 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
     return measure;
   }
 
+  // Scroll-Position der Liste über das Neuzeichnen retten.
+  _preRender(context, options) {
+    this.scrollTop = this.element?.querySelector(".vtt-list-scroll")?.scrollTop ?? this.scrollTop;
+    return super._preRender(context, options);
+  }
+
   _onRender(context, options) {
+    const list = this.element.querySelector(".vtt-list-scroll");
+    if (list && this.scrollTop) list.scrollTop = this.scrollTop;
     for (const box of this.element.querySelectorAll("input[data-indeterminate]")) box.indeterminate = true;
     if (options.parts.includes("controls")) {
       const search = this.element.querySelector("input[name=search]");

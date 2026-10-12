@@ -57,7 +57,9 @@
       "ConfirmAgain": "{again} Seiten sind bereits übersetzt, {edited} wurden von Hand geändert. Sie werden vom Original aus neu übersetzt, Handänderungen gehen verloren.",
       "RestoreTitle": "Original wiederherstellen?",
       "ConfirmRestore": "Bei {count} Seiten wird der englische Originaltext wiederhergestellt.",
-      "Restored": "{count} Seiten wiederhergestellt."
+      "Restored": "{count} Seiten wiederhergestellt.",
+      "Duration": "Dauer ca. {time}",
+      "Remaining": "noch ca. {time}"
     }
   }
 }

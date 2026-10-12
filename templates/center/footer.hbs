@@ -1,6 +1,6 @@
 <footer class="vtt-footer">
   <div class="vtt-summary">
-    <strong>{{localize "VTTTRANSLATE.Center.Selection" pages=summary.pages words=summary.words}}</strong>
+    <strong>{{localize "VTTTRANSLATE.Center.Selection" pages=summary.pages words=summary.words}}</strong>{{#if summary.time}} · {{localize "VTTTRANSLATE.Center.Duration" time=summary.time}}{{/if}}
     {{#if summary.costs.length}}
     <ul class="vtt-costs">
       {{#each summary.costs}}<li class="{{#if current}}current{{/if}}">{{name}}: ~{{cost}} $</li>{{/each}}
@@ -12,7 +12,7 @@
   {{#if queue.total}}
   <div class="vtt-progress">
     <progress value="{{queue.done}}" max="{{queue.total}}"></progress>
-    <span>{{queue.done}}/{{queue.total}} ({{queue.percent}} %){{#if queue.errors}} · {{localize "VTTTRANSLATE.Center.Errors" count=queue.errors}}{{/if}}</span>
+    <span>{{queue.done}}/{{queue.total}} ({{queue.percent}} %){{#if queue.eta}} · {{localize "VTTTRANSLATE.Center.Remaining" time=queue.eta}}{{/if}}{{#if queue.errors}} · {{localize "VTTTRANSLATE.Center.Errors" count=queue.errors}}{{/if}}</span>
   </div>
   {{/if}}
 

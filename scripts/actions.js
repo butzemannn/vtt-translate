@@ -27,8 +27,10 @@ export async function translatePage(page) {
 
   const html = getOriginal(page); // immer vom Original aus übersetzen
   const context = pageContext(page);
+  const started = Date.now();
   const result = await translateHtml({ html, context, provider });
-  await saveTranslation(page, result.html, { model, failed: result.failed, usage: result.usage, measure: measureHtml(html, context) });
+  const duration = (Date.now() - started) / 1000;
+  await saveTranslation(page, result.html, { model, failed: result.failed, usage: result.usage, measure: measureHtml(html, context), duration });
   return result;
 }
 

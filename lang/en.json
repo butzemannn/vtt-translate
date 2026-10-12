@@ -57,7 +57,9 @@
       "ConfirmAgain": "{again} pages are already translated, {edited} were edited by hand. They will be re-translated from the original; manual edits will be lost.",
       "RestoreTitle": "Restore original?",
       "ConfirmRestore": "The English original text will be restored on {count} pages.",
-      "Restored": "{count} pages restored."
+      "Restored": "{count} pages restored.",
+      "Duration": "about {time}",
+      "Remaining": "about {time} left"
     }
   }
 }

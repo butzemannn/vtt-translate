@@ -34,6 +34,6 @@
 
 ## Daten
 
-- Seite: `flags.vtt-translate.translation = { original, status, hash, model, usage, measure, translatedAt }`
-  - `usage` = echte Tokens, `measure` = Zeichenzahlen der Anfrage → Kalibrierung der Schätzung
+- Seite: `flags.vtt-translate.translation = { original, status, hash, model, usage, measure, duration, translatedAt }`
+  - `usage` = echte Tokens, `measure` = Zeichenzahlen der Anfrage, `duration` = Sekunden → Kalibrierung von Kosten- und Zeitschätzung
 - Client-Setting `vtt-translate.queue = { pending: [uuid], errors: {uuid: text} }` – nach Neuladen pausiert, „Fortsetzen“ startet erneut

@@ -53,6 +53,30 @@ export function calibrate(samples) {
 }
 
 /**
+ * Geschätzte Sekunden für outputChars Zeichen, aus gemessenen Seiten (measure + duration im Flag).
+ * Berücksichtigt parallele Anfragen. Ohne genug Messdaten: null.
+ */
+export function estimateSeconds(outputChars, samples, concurrency) {
+  let chars = 0, seconds = 0, count = 0;
+  for (const s of samples) {
+    if (!s?.measure?.outputChars || !s.duration) continue;
+    chars += s.measure.outputChars;
+    seconds += s.duration;
+    count++;
+  }
+  if (count < 3 || !chars) return null;
+  return (outputChars * (seconds / chars)) / concurrency;
+}
+
+/** Sekunden → „< 1 Min.“, „12 Min.“, „1 Std. 5 Min.“ (deutsch, für die Anzeige). */
+export function formatDuration(seconds) {
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 1) return "< 1 Min.";
+  if (minutes < 60) return `${minutes} Min.`;
+  return `${Math.floor(minutes / 60)} Std. ${minutes % 60} Min.`;
+}
+
+/**
  * Kosten in Dollar für die Summe der Zeichen.
  * @param {{inputChars: number, outputChars: number}} totals
  * @param {{input: number, output: number}} price  Dollar pro Token

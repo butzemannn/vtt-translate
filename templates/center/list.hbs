@@ -1,3 +1,4 @@
+<div class="vtt-list-scroll">
 <ol class="vtt-list">
   {{#each rows}}
   <li class="vtt-row {{kind}} status-{{status}}" data-kind="{{kind}}" data-id="{{id}}" data-uuids="{{#if uuids}}{{uuids}}{{else}}{{uuid}}{{/if}}" style="padding-left: {{indent}}px">
@@ -17,3 +18,4 @@
   <li class="vtt-empty">{{localize "VTTTRANSLATE.Center.Empty"}}</li>
   {{/each}}
 </ol>
+</div>

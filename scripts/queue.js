@@ -1,6 +1,8 @@
 // Warteschlange für Batch-Übersetzungen: mehrere Seiten parallel, Fehler blockieren nicht.
 // Ohne Foundry-Abhängigkeit; Speichern/Laden über save/load (Client-Setting).
 
+export const CONCURRENCY = 3;
+
 export class TranslationQueue {
   /**
    * @param {object} opts
@@ -10,7 +12,7 @@ export class TranslationQueue {
    * @param {(state: object) => void} [opts.save]
    * @param {object} [opts.saved]  gespeicherter Zustand aus einer früheren Sitzung
    */
-  constructor({ worker, concurrency = 3, onChange = () => {}, save = () => {}, saved }) {
+  constructor({ worker, concurrency = CONCURRENCY, onChange = () => {}, save = () => {}, saved }) {
     this.worker = worker;
     this.concurrency = concurrency;
     this.onChange = onChange;

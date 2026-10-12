@@ -26,5 +26,6 @@ test("footer.hbs und controls.hbs rendern", () => {
   const footer = render("footer", { summary: { pages: 2, words: "100", costs: [{ name: "X", cost: "0.10", current: true }] }, queue: { total: 3, done: 1, percent: 33, running: true, paused: false } });
   assert.match(footer, /data-action="pause"/);
   assert.match(footer, /~0.10 \$/);
+  assert.match(render("footer", { summary: { pages: 1, words: "1", costs: [], time: "5 Min." }, queue: { total: 2, done: 1, running: true, eta: "3 Min." } }), /Remaining.*3 Min/);
   assert.match(render("controls", { filters: [{ value: "all", label: "Alle", selected: true }] }), /<option value="all" selected>/);
 });

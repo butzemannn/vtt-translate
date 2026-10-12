@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 – 2026-10-12
+
+- Zentrale: Restzeit während des Laufs und geschätzte Dauer der Auswahl (aus gemessener Dauer pro Seite, ab 3 Seiten)
+- Zentrale: Suchleiste und Filter fest oben, nur die Liste scrollt; Scroll-Position bleibt beim Aktualisieren erhalten
+- Suchleiste einheitlich formatiert
+
 ## 0.3.0 – 2026-10-12
 
 - **Übersetzungs-Zentrale** (Knopf in der Journal-Seitenleiste): alle Ordner/Journale/Seiten mit Status, Filter, Suche, Auswahl per Haken
