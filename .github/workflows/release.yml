@@ -1,0 +1,40 @@
+# Baut bei einem Tag "vX.Y.Z" das Modul-Zip und legt ein GitHub-Release an.
+# Läuft nur auf GitHub (Repo wird von Forgejo dorthin gespiegelt).
+# Foundry installiert über: https://github.com/<owner>/<repo>/releases/latest/download/module.json
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.server_url == 'https://github.com'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version prüfen
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          test "$(jq -r .version module.json)" = "$VERSION" || { echo "module.json-Version passt nicht zum Tag $GITHUB_REF_NAME"; exit 1; }
+
+      - name: URLs in module.json setzen
+        run: |
+          URL="https://github.com/${GITHUB_REPOSITORY}"
+          jq --arg url "$URL" --arg tag "$GITHUB_REF_NAME" \
+            '.url = $url
+             | .manifest = "\($url)/releases/latest/download/module.json"
+             | .download = "\($url)/releases/download/\($tag)/module.zip"' \
+            module.json > module.tmp && mv module.tmp module.json
+
+      - name: Zip bauen
+        run: zip -r module.zip module.json scripts lang vendor README.md Changelog.md
+
+      - name: Release anlegen
+        run: gh release create "$GITHUB_REF_NAME" module.json module.zip --title "$GITHUB_REF_NAME" --notes "Änderungen: siehe Changelog.md"
+        env:
+          GH_TOKEN: ${{ github.token }}

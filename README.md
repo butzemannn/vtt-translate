@@ -11,7 +11,7 @@ Version 0.1.0 – einzelne Seite übersetzen und wiederherstellen (Claude). Plan
 Foundry → Add-on-Module → Modul installieren → Manifest-URL:
 
 ```
-https://git.thaele.eu/sven/vtt-translator/raw/branch/main/module.json
+https://github.com/<owner>/<repo>/releases/latest/download/module.json
 ```
 
 Danach in der Welt aktivieren → Einstellungen → VTT Translate → API-Key eintragen.

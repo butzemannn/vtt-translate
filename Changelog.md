@@ -9,5 +9,5 @@
 - Claude-Anbindung über gebündeltes Anthropic-SDK (`vendor/anthropic-sdk.mjs`)
 - Original als Flag sichern, Wiederherstellen (`scripts/store.js`)
 - Knöpfe „Seite übersetzen“ / „Original wiederherstellen“ im Journal-Fenster (nur GM)
-- Release über Forgejo Actions: Tag `vX.Y.Z` → `module.zip`; Installation per Manifest-URL aus `main`
+- Release über GitHub Actions (Spiegel von Forgejo): Tag `vX.Y.Z` → `module.zip` + `module.json`, Installation per Manifest-URL
 - Tests gegen die Sample-Journale, Skript für Probeübersetzungen (`tools/try-page.js`)
