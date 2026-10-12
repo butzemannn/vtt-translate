@@ -1,0 +1,3 @@
+Du sollst ein Addon für Foundryy Virtual Table Top erstellen. Und zwar spielen wir DnD 5th Edition mit der Curse of Strahd Erweiterung von Pyramid King.
+
+Hier sind ja schon einige Maps vorgegeben. Aber in der Welt liegen überall Journaleinträge herum. Und diese sind auf Englisch. Wir möchten die Story jedoch auf Deutsch erleben und erzählen. Deshalb brauche ich ein Addon, welches mir ermöglicht, die bereits gesetzten Tagebucheinträge in der Welt verstreut mittels Anbindung an ein LLM auf Deutsch zu übersetzen. Die übersetzung sollte gut sein. Und auch entsprechend bspw. dem Alter oder dem Charakter der Spielwelt entsprechen.

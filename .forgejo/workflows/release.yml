@@ -1,0 +1,35 @@
+# Bei einem Tag "vX.Y.Z": module.zip bauen und als Forgejo-Release hochladen.
+# Foundry lädt module.json aus dem main-Branch (Manifest-URL), dort steht die Download-URL des Zips.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+jobs:
+  release:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version und Download-URL prüfen
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          node -e '
+            const m = require("./module.json");
+            const [version, tag] = process.argv.slice(1);
+            if (m.version !== version) throw new Error(`module.json version ${m.version} != Tag ${tag}`);
+            if (!m.download.endsWith(`/releases/download/${tag}/module.zip`)) throw new Error(`download-URL passt nicht zu ${tag}`);
+          ' "$VERSION" "$GITHUB_REF_NAME"
+
+      - name: Zip bauen
+        run: |
+          mkdir -p dist/release
+          python3 -m zipfile -c dist/release/module.zip module.json scripts lang vendor README.md Changelog.md
+          cp module.json dist/release/module.json
+
+      - uses: actions/forgejo-release@v2.13.4
+        with:
+          direction: upload
+          release-dir: dist/release
+          release-notes: "Änderungen: siehe Changelog.md"

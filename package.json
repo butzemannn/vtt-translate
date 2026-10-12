@@ -1,0 +1,15 @@
+{
+  "name": "vtt-translate",
+  "private": true,
+  "type": "module",
+  "description": "Nur für Entwicklung: Tests und Vendoring des Anthropic-SDK. Das Modul selbst braucht kein npm.",
+  "scripts": {
+    "vendor": "esbuild tools/vendor-entry.js --bundle --format=esm --platform=browser --minify --outfile=vendor/anthropic-sdk.mjs",
+    "test": "node --test tests/"
+  },
+  "devDependencies": {
+    "@anthropic-ai/sdk": "0.133.0",
+    "esbuild": "0.28.2",
+    "jsdom": "26.1.0"
+  }
+}

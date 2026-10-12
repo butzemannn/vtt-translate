@@ -1,0 +1,28 @@
+{
+  "id": "vtt-translate",
+  "title": "VTT Translate",
+  "description": "Übersetzt Journal-Seiten per LLM ins Deutsche – im Stil der Spielwelt, mit erhaltener Formatierung und Links.",
+  "version": "0.1.0",
+  "url": "https://git.thaele.eu/sven/vtt-translator",
+  "manifest": "https://git.thaele.eu/sven/vtt-translator/raw/branch/main/module.json",
+  "download": "https://git.thaele.eu/sven/vtt-translator/releases/download/v0.1.0/module.zip",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14.368"
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "languages": [
+    {
+      "lang": "de",
+      "name": "Deutsch",
+      "path": "lang/de.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "VTTTRANSLATE": {
+    "Settings": {
+      "Provider": { "Name": "LLM provider" },
+      "Model": { "Name": "Model", "Hint": "Provider model ID, e.g. claude-opus-5-5 or claude-sonnet-5-5." },
+      "ApiKey": { "Name": "API key", "Hint": "Stored in this browser only." }
+    },
+    "Controls": {
+      "Translate": "Translate page",
+      "Restore": "Restore original"
+    },
+    "Notify": {
+      "NoTextPage": "No text page selected.",
+      "NoApiKey": "No API key set (Settings → VTT Translate).",
+      "Started": "Translating \"{name}\" …",
+      "Done": "\"{name}\" translated.",
+      "Partial": "\"{name}\" translated, {failed} of {total} paragraphs remained in English.",
+      "Error": "Translation of \"{name}\" failed: {error}",
+      "NotTranslated": "This page is not translated.",
+      "Restored": "Original of \"{name}\" restored."
+    }
+  }
+}
