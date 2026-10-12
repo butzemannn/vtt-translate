@@ -1,9 +1,13 @@
-// Einstiegspunkt: Einstellungen und Knöpfe im Journal-Fenster.
-import { MODULE_ID, getOriginal, isTranslated, saveTranslation, restoreOriginal } from "./store.js";
-import { translateHtml } from "./translator.js";
-import { createProvider } from "./providers/index.js";
+// Einstiegspunkt: Einstellungen, Knöpfe im Journal-Fenster, Zentrale und Seitenleiste.
+import { MODULE_ID, isTranslated, pageStatus } from "./store.js";
+import { translatePage, restorePage } from "./actions.js";
+import { TranslationQueue } from "./queue.js";
+import { TranslationCenter } from "./ui/center.js";
+import { STATUS, summarize } from "./ui/rows.js";
 
 const running = new Set();
+let queue;
+let center;
 
 Hooks.once("init", () => {
   game.settings.register(MODULE_ID, "provider", {
@@ -30,6 +34,60 @@ Hooks.once("init", () => {
     type: String,
     default: ""
   });
+  // Offene Batch-Seiten, damit ein Lauf nach Neuladen fortgesetzt werden kann.
+  game.settings.register(MODULE_ID, "queue", { scope: "client", config: false, type: Object, default: {} });
+});
+
+Hooks.once("ready", () => {
+  if (!game.user.isGM) return;
+  const refreshSidebar = foundry.utils.debounce(() => ui.journal?.render(), 1000);
+  queue = new TranslationQueue({
+    worker: async uuid => {
+      await translatePage(await fromUuid(uuid));
+      refreshSidebar();
+    },
+    saved: game.settings.get(MODULE_ID, "queue"),
+    save: state => game.settings.set(MODULE_ID, "queue", state),
+    onChange: () => center?.refresh()
+  });
+  game.modules.get(MODULE_ID).api = { openCenter };
+  ui.journal?.render(); // Seitenleiste wurde vor "ready" ohne Knopf gerendert
+  if (queue.pending.length) ui.notifications.info(game.i18n.format("VTTTRANSLATE.Notify.Resumable", { count: queue.pending.length }));
+});
+
+function openCenter() {
+  center ??= new TranslationCenter(queue);
+  center.render({ force: true });
+}
+
+// Änderungen an Seiten (auch von Hand) in der Zentrale nachziehen.
+Hooks.on("updateJournalEntryPage", () => center?.refresh());
+
+// Seitenleiste: Knopf zur Zentrale und Status-Symbol je Journal.
+Hooks.on("renderJournalDirectory", (app, html) => {
+  if (!game.user.isGM || !queue) return;
+  const root = html instanceof HTMLElement ? html : html[0];
+
+  if (!root.querySelector(".vtt-translate-open")) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "vtt-translate-open";
+    button.innerHTML = `<i class="fa-solid fa-language"></i> ${game.i18n.localize("VTTTRANSLATE.Center.Title")}`;
+    button.addEventListener("click", openCenter);
+    (root.querySelector(".header-actions") ?? root.querySelector("header") ?? root).append(button);
+  }
+
+  for (const li of root.querySelectorAll("[data-entry-id]")) {
+    const entry = game.journal.get(li.dataset.entryId);
+    const pages = entry?.pages.filter(p => p.type === "text") ?? [];
+    if (!pages.length) continue;
+    const { status, done, total } = summarize(pages.map(p => queue.statusOf(p.uuid) ?? pageStatus(p)));
+    if (status === "open") continue;
+    const icon = document.createElement("i");
+    icon.className = `vtt-translate-status status-${status} ${STATUS[status].icon}`;
+    icon.dataset.tooltip = `${game.i18n.localize(`VTTTRANSLATE.Status.${status}`)} (${done}/${total})`;
+    (li.querySelector(".entry-name, .document-name") ?? li).append(icon);
+  }
 });
 
 Hooks.on("getHeaderControlsJournalEntrySheet", (app, controls) => {
@@ -39,13 +97,13 @@ Hooks.on("getHeaderControlsJournalEntrySheet", (app, controls) => {
       action: "vttTranslatePage",
       icon: "fa-solid fa-language",
       label: "VTTTRANSLATE.Controls.Translate",
-      onClick: () => translatePage(currentPage(app))
+      onClick: () => translateCurrent(currentPage(app))
     },
     {
       action: "vttRestorePage",
       icon: "fa-solid fa-rotate-left",
       label: "VTTTRANSLATE.Controls.Restore",
-      onClick: () => restorePage(currentPage(app))
+      onClick: () => restoreCurrent(currentPage(app))
     }
   );
 });
@@ -56,32 +114,12 @@ function currentPage(app) {
   return pages.get(app.pageId) ?? pages.contents.sort((a, b) => a.sort - b.sort)[0];
 }
 
-function folderPath(entry) {
-  const folder = entry.folder;
-  if (!folder) return "";
-  return [...folder.ancestors].reverse().concat(folder).map(f => f.name).join(" / ");
-}
-
-async function translatePage(page) {
-  if (!page || page.type !== "text") return ui.notifications.warn(game.i18n.localize("VTTTRANSLATE.Notify.NoTextPage"));
-  if (running.has(page.uuid)) return;
-
-  const apiKey = game.settings.get(MODULE_ID, "apiKey");
-  if (!apiKey) return ui.notifications.error(game.i18n.localize("VTTTRANSLATE.Notify.NoApiKey"));
-  const model = game.settings.get(MODULE_ID, "model");
-
+async function translateCurrent(page) {
+  if (!page || running.has(page.uuid)) return;
   running.add(page.uuid);
   ui.notifications.info(game.i18n.format("VTTTRANSLATE.Notify.Started", { name: page.name }));
   try {
-    const provider = createProvider(game.settings.get(MODULE_ID, "provider"), { apiKey, model });
-    const entry = page.parent;
-    const result = await translateHtml({
-      html: getOriginal(page), // immer vom Original aus übersetzen
-      context: { journal: entry.name, folder: folderPath(entry), page: page.name },
-      provider
-    });
-    await saveTranslation(page, result.html, { model, failed: result.failed });
-
+    const result = await translatePage(page);
     if (result.failed) ui.notifications.warn(game.i18n.format("VTTTRANSLATE.Notify.Partial", { name: page.name, failed: result.failed, total: result.total }));
     else ui.notifications.info(game.i18n.format("VTTTRANSLATE.Notify.Done", { name: page.name }));
   } catch (err) {
@@ -92,8 +130,8 @@ async function translatePage(page) {
   }
 }
 
-async function restorePage(page) {
+async function restoreCurrent(page) {
   if (!page || !isTranslated(page)) return ui.notifications.warn(game.i18n.localize("VTTTRANSLATE.Notify.NotTranslated"));
-  await restoreOriginal(page);
+  await restorePage(page);
   ui.notifications.info(game.i18n.format("VTTTRANSLATE.Notify.Restored", { name: page.name }));
 }

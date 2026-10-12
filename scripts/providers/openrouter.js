@@ -22,7 +22,7 @@ export function createOpenRouterProvider({ apiKey, model }) {
   }
 
   return {
-    /** @returns {Promise<string>} JSON-Text gemäß schema */
+    /** @returns {Promise<{text: string, usage: {input: number, output: number}}>} */
     async translate({ system, input, schema }) {
       const body = {
         model,
@@ -47,7 +47,7 @@ export function createOpenRouterProvider({ apiKey, model }) {
       if (choice?.finish_reason === "content_filter") throw new Error("Modell hat die Übersetzung abgelehnt.");
       const text = choice?.message?.content;
       if (!text) throw new Error("Leere Antwort von OpenRouter.");
-      return text;
+      return { text, usage: { input: data.usage?.prompt_tokens ?? 0, output: data.usage?.completion_tokens ?? 0 } };
     }
   };
 }

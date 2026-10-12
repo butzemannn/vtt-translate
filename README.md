@@ -4,7 +4,7 @@ Foundry-VTT-Modul (v14), das Journal-Seiten per LLM ins Deutsche übersetzt – 
 
 ## Stand
 
-Version 0.2.0 – einzelne Seite übersetzen und wiederherstellen. Anbieter: Claude (Anthropic) oder OpenRouter. Plan: `instructions/plan.md`.
+Version 0.3.0 – Übersetzungs-Zentrale mit Batch und Kostenschätzung. Anbieter: Claude (Anthropic) oder OpenRouter. Plan: `instructions/plan.md`.
 
 ## Installation
 
@@ -18,9 +18,10 @@ Danach in der Welt aktivieren → Einstellungen → VTT Translate → Anbieter, 
 
 Für Entwicklung alternativ per Symlink: `ln -s /pfad/zu/vtt-translate <Foundry-Data>/modules/vtt-translate`. Releases: `docs/release.md`.
 
-## Benutzung
+## Benutzung (nur GM)
 
-Journal öffnen → Menü oben rechts im Fenster → **Seite übersetzen** bzw. **Original wiederherstellen**. Nur für den GM sichtbar.
+- **Viele Seiten:** Journal-Seitenleiste → **Übersetzungs-Zentrale** → Seiten/Journale/Ordner anhaken (oder „Offene auswählen“) → Kosten prüfen → **Übersetzen**. Läuft im Hintergrund, Pause/Fortsetzen möglich.
+- **Eine Seite:** Journal öffnen → Menü oben rechts → **Seite übersetzen** bzw. **Original wiederherstellen**.
 
 ## Entwicklung
 

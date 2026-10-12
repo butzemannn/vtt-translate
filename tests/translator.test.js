@@ -12,7 +12,8 @@ function fakeProvider(transform) {
     async translate({ input }) {
       const { blocks } = JSON.parse(input);
       calls.push(blocks);
-      return JSON.stringify({ blocks: blocks.map(b => ({ id: b.id, html: transform(b, calls.length) })) });
+      const text = JSON.stringify({ blocks: blocks.map(b => ({ id: b.id, html: transform(b, calls.length) })) });
+      return { text, usage: { input: 10, output: 5 } };
     }
   };
 }
@@ -38,6 +39,7 @@ test("Fehlerhafter Block wird einmal mit Hinweis erneut angefragt", async () => 
   assert.match(provider.calls[1][0].fix, /fehlt/);
   assert.equal(result.failed, 0);
   assert.equal(result.html, `<p>Eins <em>two</em></p><p>Drei</p>`);
+  assert.deepEqual(result.usage, { input: 20, output: 10 });
 });
 
 test("Dauerhaft fehlerhafter Block bleibt im Original", async () => {

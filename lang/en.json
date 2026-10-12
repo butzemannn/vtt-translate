@@ -1,9 +1,17 @@
 {
   "VTTTRANSLATE": {
     "Settings": {
-      "Provider": { "Name": "LLM provider" },
-      "Model": { "Name": "Model", "Hint": "Provider model ID. Claude: e.g. claude-opus-5-5. OpenRouter: ID from openrouter.ai/models in the format provider/model." },
-      "ApiKey": { "Name": "API key", "Hint": "Key of the selected provider. Stored in this browser only." }
+      "Provider": {
+        "Name": "LLM provider"
+      },
+      "Model": {
+        "Name": "Model",
+        "Hint": "Provider model ID. Claude: e.g. claude-opus-5-5. OpenRouter: ID from openrouter.ai/models in the format provider/model."
+      },
+      "ApiKey": {
+        "Name": "API key",
+        "Hint": "Key of the selected provider. Stored in this browser only."
+      }
     },
     "Controls": {
       "Translate": "Translate page",
@@ -17,7 +25,39 @@
       "Partial": "\"{name}\" translated, {failed} of {total} paragraphs remained in English.",
       "Error": "Translation of \"{name}\" failed: {error}",
       "NotTranslated": "This page is not translated.",
-      "Restored": "Original of \"{name}\" restored."
+      "Restored": "Original of \"{name}\" restored.",
+      "Resumable": "VTT Translate: {count} pages are still waiting for translation. Open the Translation Center → Resume."
+    },
+    "Status": {
+      "open": "Open",
+      "queued": "Queued",
+      "active": "In progress",
+      "translated": "Translated",
+      "partial": "Partial",
+      "edited": "Edited by hand",
+      "error": "Error"
+    },
+    "Center": {
+      "Title": "Translation Center",
+      "FilterAll": "All",
+      "Search": "Search …",
+      "SelectOpen": "Select open",
+      "ClearSelection": "Clear selection",
+      "Empty": "No pages found.",
+      "Selection": "Selection: {pages} pages · {words} words",
+      "Rough": "Rough estimate (live prices from OpenRouter).",
+      "Calibrated": "Estimated from {count} already translated pages.",
+      "Errors": "{count} errors",
+      "Translate": "Translate",
+      "Pause": "Pause",
+      "Resume": "Resume",
+      "Cancel": "Cancel",
+      "Restore": "Restore original",
+      "ConfirmTitle": "Translate again?",
+      "ConfirmAgain": "{again} pages are already translated, {edited} were edited by hand. They will be re-translated from the original; manual edits will be lost.",
+      "RestoreTitle": "Restore original?",
+      "ConfirmRestore": "The English original text will be restored on {count} pages.",
+      "Restored": "{count} pages restored."
     }
   }
 }

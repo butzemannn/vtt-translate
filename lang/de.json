@@ -1,9 +1,17 @@
 {
   "VTTTRANSLATE": {
     "Settings": {
-      "Provider": { "Name": "LLM-Anbieter" },
-      "Model": { "Name": "Modell", "Hint": "Modell-ID des Anbieters. Claude: z. B. claude-opus-5-5. OpenRouter: ID von openrouter.ai/models im Format anbieter/modell." },
-      "ApiKey": { "Name": "API-Key", "Hint": "Key des gewählten Anbieters. Wird nur in diesem Browser gespeichert." }
+      "Provider": {
+        "Name": "LLM-Anbieter"
+      },
+      "Model": {
+        "Name": "Modell",
+        "Hint": "Modell-ID des Anbieters. Claude: z. B. claude-opus-5-5. OpenRouter: ID von openrouter.ai/models im Format anbieter/modell."
+      },
+      "ApiKey": {
+        "Name": "API-Key",
+        "Hint": "Key des gewählten Anbieters. Wird nur in diesem Browser gespeichert."
+      }
     },
     "Controls": {
       "Translate": "Seite übersetzen",
@@ -17,7 +25,39 @@
       "Partial": "„{name}“ übersetzt, {failed} von {total} Absätzen sind englisch geblieben.",
       "Error": "Übersetzung von „{name}“ fehlgeschlagen: {error}",
       "NotTranslated": "Diese Seite ist nicht übersetzt.",
-      "Restored": "Original von „{name}“ wiederhergestellt."
+      "Restored": "Original von „{name}“ wiederhergestellt.",
+      "Resumable": "VTT Translate: {count} Seiten warten noch auf Übersetzung. Zentrale öffnen → Fortsetzen."
+    },
+    "Status": {
+      "open": "Offen",
+      "queued": "Wartet",
+      "active": "In Arbeit",
+      "translated": "Übersetzt",
+      "partial": "Teilweise",
+      "edited": "Von Hand geändert",
+      "error": "Fehler"
+    },
+    "Center": {
+      "Title": "Übersetzungs-Zentrale",
+      "FilterAll": "Alle",
+      "Search": "Suchen …",
+      "SelectOpen": "Offene auswählen",
+      "ClearSelection": "Auswahl leeren",
+      "Empty": "Keine Seiten gefunden.",
+      "Selection": "Auswahl: {pages} Seiten · {words} Wörter",
+      "Rough": "Grobe Schätzung (Preise live von OpenRouter).",
+      "Calibrated": "Geschätzt anhand von {count} bereits übersetzten Seiten.",
+      "Errors": "{count} Fehler",
+      "Translate": "Übersetzen",
+      "Pause": "Pause",
+      "Resume": "Fortsetzen",
+      "Cancel": "Abbrechen",
+      "Restore": "Original wiederherstellen",
+      "ConfirmTitle": "Erneut übersetzen?",
+      "ConfirmAgain": "{again} Seiten sind bereits übersetzt, {edited} wurden von Hand geändert. Sie werden vom Original aus neu übersetzt, Handänderungen gehen verloren.",
+      "RestoreTitle": "Original wiederherstellen?",
+      "ConfirmRestore": "Bei {count} Seiten wird der englische Originaltext wiederhergestellt.",
+      "Restored": "{count} Seiten wiederhergestellt."
     }
   }
 }

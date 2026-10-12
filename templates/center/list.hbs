@@ -1,0 +1,19 @@
+<ol class="vtt-list">
+  {{#each rows}}
+  <li class="vtt-row {{kind}} status-{{status}}" data-kind="{{kind}}" data-id="{{id}}" data-uuids="{{#if uuids}}{{uuids}}{{else}}{{uuid}}{{/if}}" style="padding-left: {{indent}}px">
+    <input type="checkbox" data-action="toggleSelect" {{#if checked}}checked{{/if}} {{#if indeterminate}}data-indeterminate{{/if}}>
+    {{#if (eq kind "page")}}
+      <span class="vtt-toggle"></span>
+      <i class="fa-regular fa-file-lines"></i>
+    {{else}}
+      <a class="vtt-toggle" data-action="toggleExpand"><i class="fa-solid {{#if expanded}}fa-caret-down{{else}}fa-caret-right{{/if}}"></i></a>
+      <i class="fa-solid {{#if (eq kind 'folder')}}fa-folder{{else}}fa-book{{/if}}"></i>
+    {{/if}}
+    <span class="vtt-name">{{name}}</span>
+    {{#unless (eq kind "page")}}<span class="vtt-count">{{done}}/{{total}}</span>{{/unless}}
+    <i class="vtt-status {{icon}}" data-tooltip="{{statusLabel}}{{#if error}}: {{error}}{{/if}}"></i>
+  </li>
+  {{else}}
+  <li class="vtt-empty">{{localize "VTTTRANSLATE.Center.Empty"}}</li>
+  {{/each}}
+</ol>

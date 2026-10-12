@@ -2,13 +2,16 @@
   "id": "vtt-translate",
   "title": "VTT Translate",
   "description": "Übersetzt Journal-Seiten per LLM ins Deutsche – im Stil der Spielwelt, mit erhaltener Formatierung und Links.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14.368"
   },
   "esmodules": [
     "scripts/main.js"
+  ],
+  "styles": [
+    "styles/vtt-translate.css"
   ],
   "languages": [
     {

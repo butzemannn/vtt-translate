@@ -1,0 +1,8 @@
+<div class="vtt-controls">
+  <select name="filter">
+    {{#each filters}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+  </select>
+  <input type="search" name="search" value="{{search}}" placeholder="{{localize 'VTTTRANSLATE.Center.Search'}}">
+  <button type="button" data-action="selectOpen"><i class="fa-solid fa-check-double"></i> {{localize "VTTTRANSLATE.Center.SelectOpen"}}</button>
+  <button type="button" data-action="clearSelection" data-tooltip="{{localize 'VTTTRANSLATE.Center.ClearSelection'}}"><i class="fa-solid fa-xmark"></i></button>
+</div>

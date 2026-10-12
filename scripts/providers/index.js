@@ -1,4 +1,5 @@
 // Wählt den Provider anhand der Einstellungen.
+// Schnittstelle: translate({system, input, schema}) → {text, usage: {input, output}}
 import { createClaudeProvider } from "./claude.js";
 import { createOpenRouterProvider } from "./openrouter.js";
 

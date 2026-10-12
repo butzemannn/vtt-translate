@@ -14,15 +14,21 @@ function mockFetch(responses) {
   return requests;
 }
 
-const ok = content => ({ body: { choices: [{ finish_reason: "stop", message: { content } }] } });
+const ok = content => ({ body: { choices: [{ finish_reason: "stop", message: { content } }], usage: { prompt_tokens: 7, completion_tokens: 3 } } });
 const args = { system: "s", input: "i", schema: { type: "object" } };
 
 test("Sendet Structured Output und liefert den Text", async () => {
   const requests = mockFetch([ok('{"blocks":[]}')]);
-  const text = await createOpenRouterProvider({ apiKey: "k", model: "m" }).translate(args);
+  const { text } = await createOpenRouterProvider({ apiKey: "k", model: "m" }).translate(args);
   assert.equal(text, '{"blocks":[]}');
   assert.equal(requests[0].response_format.type, "json_schema");
   assert.equal(requests[0].model, "m");
+});
+
+test("Liefert den Verbrauch", async () => {
+  mockFetch([ok("{}")]);
+  const { usage } = await createOpenRouterProvider({ apiKey: "k", model: "m" }).translate(args);
+  assert.deepEqual(usage, { input: 7, output: 3 });
 });
 
 test("Ohne Structured Output erneut, wenn das Modell es nicht kann", async () => {

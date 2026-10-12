@@ -61,11 +61,25 @@ export function parseJson(text) {
   }
 }
 
-async function requestBlocks(provider, system, context, blocks, notes) {
-  const text = await provider.translate({ system, input: buildInput(context, blocks, notes), schema: RESPONSE_SCHEMA });
+async function requestBlocks(provider, system, context, blocks, notes, usage) {
+  const res = await provider.translate({ system, input: buildInput(context, blocks, notes), schema: RESPONSE_SCHEMA });
+  usage.input += res.usage?.input ?? 0;
+  usage.output += res.usage?.output ?? 0;
   const result = new Map();
-  for (const b of parseJson(text).blocks ?? []) result.set(b.id, b.html);
+  for (const b of parseJson(res.text).blocks ?? []) result.set(b.id, b.html);
   return result;
+}
+
+/**
+ * Zeichenzahlen einer Seite für die Kostenschätzung (ohne Anfrage).
+ * @returns {{inputChars: number, outputChars: number, words: number}}
+ */
+export function measureHtml(html, context = {}) {
+  const { blocks } = splitBlocks(html);
+  if (!blocks.length) return { inputChars: 0, outputChars: 0, words: 0 };
+  const outputChars = blocks.reduce((sum, b) => sum + b.html.length, 0);
+  const words = blocks.reduce((sum, b) => sum + b.el.textContent.split(/\s+/).filter(Boolean).length, 0);
+  return { inputChars: SYSTEM_PROMPT.length + buildInput(context, blocks).length, outputChars, words };
 }
 
 /**
@@ -75,11 +89,12 @@ async function requestBlocks(provider, system, context, blocks, notes) {
  * @param {object} args.context         z. B. {journal, folder, page}
  * @param {{source:string,target:string}[]} [args.glossary]
  * @param {{translate: Function}} args.provider
- * @returns {Promise<{html: string, failed: number, total: number}>}
+ * @returns {Promise<{html: string, failed: number, total: number, usage: {input: number, output: number}}>}
  */
 export async function translateHtml({ html, context, glossary, provider }) {
   const { root, blocks } = splitBlocks(html);
-  if (!blocks.length) return { html, failed: 0, total: 0 };
+  const usage = { input: 0, output: 0 };
+  if (!blocks.length) return { html, failed: 0, total: 0, usage };
 
   const system = buildSystem(glossary);
   let pending = blocks;
@@ -87,7 +102,7 @@ export async function translateHtml({ html, context, glossary, provider }) {
 
   // Erster Versuch für alle Blöcke, zweiter nur für fehlerhafte (mit Fehlerhinweis).
   for (let attempt = 0; attempt < 2 && pending.length; attempt++) {
-    const result = await requestBlocks(provider, system, context, pending, notes);
+    const result = await requestBlocks(provider, system, context, pending, notes, usage);
     const retry = [];
     notes = {};
     for (const block of pending) {
@@ -104,5 +119,5 @@ export async function translateHtml({ html, context, glossary, provider }) {
   }
 
   // Fehlgeschlagene Blöcke bleiben im Original stehen.
-  return { html: joinBlocks(root), failed: pending.length, total: blocks.length };
+  return { html: joinBlocks(root), failed: pending.length, total: blocks.length, usage };
 }

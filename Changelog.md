@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 – 2026-10-12
+
+- **Übersetzungs-Zentrale** (Knopf in der Journal-Seitenleiste): alle Ordner/Journale/Seiten mit Status, Filter, Suche, Auswahl per Haken
+- Batch-Übersetzung über Warteschlange (3 parallel), Pause/Fortsetzen/Abbrechen, Fortschritt; offene Seiten überstehen Neuladen
+- Kostenschätzung der Auswahl mit Live-Preisen von OpenRouter (aktuelles Modell, DeepSeek V4 Pro, Claude Sonnet/Opus 5.5); kalibriert sich an echten Verbrauchsdaten
+- Status „von Hand geändert“ (Hash der Übersetzung); Rückfrage vor erneutem Übersetzen
+- Original für ganze Auswahl wiederherstellen
+- Status-Symbol je Journal in der Seitenleiste
+- Provider liefern Token-Verbrauch; wird an der Seite gespeichert
+
 ## 0.2.0 – 2026-10-12
 
 - Neuer Anbieter OpenRouter (`scripts/providers/openrouter.js`): Modell frei wählbar, Structured Output mit Fallback für Modelle ohne Unterstützung

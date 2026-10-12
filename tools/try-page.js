@@ -20,4 +20,4 @@ const result = await translateHtml({ html: page.html, context: { journal: page.j
 mkdirSync("out", { recursive: true });
 const file = `out/${pageName.replace(/[^\w-]+/g, "_")}.${model.replace(/[^\w.-]+/g, "_")}.html`;
 writeFileSync(file, `<meta charset="utf-8"><h1>${page.name} – ${model}</h1><h2>Deutsch</h2>${result.html}<hr><h2>Original</h2>${page.html}`);
-console.log(`${file} – ${result.total - result.failed}/${result.total} Absätze, ${((Date.now() - started) / 1000).toFixed(1)} s`);
+console.log(`${file} – ${result.total - result.failed}/${result.total} Absätze, ${((Date.now() - started) / 1000).toFixed(1)} s, Tokens ${result.usage.input} rein / ${result.usage.output} raus`);

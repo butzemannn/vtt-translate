@@ -1,0 +1,192 @@
+// Übersetzungs-Zentrale: alle Journale mit Status, Auswahl, Kostenschätzung und Batch-Steuerung.
+import { MODULE_ID, pageStatus, getOriginal, getTranslation } from "../store.js";
+import { measureHtml } from "../translator.js";
+import { loadPrices, calibrate, estimateCost, toOpenRouterId, COMPARE_MODELS } from "../estimate.js";
+import { buildRows, STATUS } from "./rows.js";
+import { pageContext, restorePage } from "../actions.js";
+
+const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
+const TEMPLATES = `modules/${MODULE_ID}/templates/center`;
+
+export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2) {
+  static DEFAULT_OPTIONS = {
+    id: "vtt-translate-center",
+    classes: ["vtt-translate-center"],
+    window: { title: "VTTTRANSLATE.Center.Title", icon: "fa-solid fa-language", resizable: true },
+    position: { width: 680, height: 760 },
+    actions: {
+      toggleExpand: TranslationCenter.#onToggleExpand,
+      toggleSelect: TranslationCenter.#onToggleSelect,
+      selectOpen: TranslationCenter.#onSelectOpen,
+      clearSelection: TranslationCenter.#onClearSelection,
+      translate: TranslationCenter.#onTranslate,
+      pause: TranslationCenter.#onPause,
+      resume: TranslationCenter.#onResume,
+      cancel: TranslationCenter.#onCancel,
+      restore: TranslationCenter.#onRestore
+    }
+  };
+
+  static PARTS = {
+    controls: { template: `${TEMPLATES}/controls.hbs` },
+    list: { template: `${TEMPLATES}/list.hbs`, scrollable: [""] },
+    footer: { template: `${TEMPLATES}/footer.hbs` }
+  };
+
+  /** @param {import("../queue.js").TranslationQueue} queue */
+  constructor(queue, options) {
+    super(options);
+    this.queue = queue;
+    this.selected = new Set();
+    this.expanded = new Set();
+    this.collapsed = new Set();
+    this.filter = "all";
+    this.search = "";
+    this.measures = new Map(); // uuid → {html, measure}, damit nicht bei jedem Rendern neu gezählt wird
+    this.refresh = foundry.utils.debounce(() => this.rendered && this.render({ parts: ["list", "footer"] }), 300);
+  }
+
+  statusOf = page => this.queue.statusOf(page.uuid) ?? pageStatus(page);
+
+  async _prepareContext(options) {
+    const statusLabel = s => game.i18n.localize(`VTTTRANSLATE.Status.${s}`);
+    const { rows } = buildRows({
+      folders: game.folders.filter(f => f.type === "JournalEntry"),
+      entries: game.journal.contents,
+      statusOf: this.statusOf,
+      selected: this.selected,
+      expanded: this.expanded,
+      collapsed: this.collapsed,
+      filter: this.filter,
+      search: this.search
+    });
+    for (const row of rows) {
+      row.icon = STATUS[row.status].icon;
+      row.statusLabel = statusLabel(row.status);
+      row.indent = row.depth * 18;
+      row.error = row.kind === "page" ? this.queue.errors.get(row.uuid) : undefined;
+    }
+
+    const filters = ["all", ...Object.keys(STATUS)].map(value => ({ value, label: value === "all" ? game.i18n.localize("VTTTRANSLATE.Center.FilterAll") : statusLabel(value), selected: value === this.filter }));
+    const q = this.queue;
+    return {
+      rows,
+      filters,
+      search: this.search,
+      summary: await this.#summary(),
+      queue: { running: q.running, paused: q.paused, hasPending: q.pending.length > 0, done: q.done, total: q.total, percent: q.total ? Math.round((q.done / q.total) * 100) : 0, errors: q.errors.size }
+    };
+  }
+
+  /** Anzahl, Wörter und Kosten der Auswahl. */
+  async #summary() {
+    const totals = { inputChars: 0, outputChars: 0, words: 0 };
+    for (const uuid of this.selected) {
+      const m = this.#measure(fromUuidSync(uuid));
+      if (!m) continue;
+      totals.inputChars += m.inputChars;
+      totals.outputChars += m.outputChars;
+      totals.words += m.words;
+    }
+
+    const translated = game.journal.contents.flatMap(e => e.pages.contents).map(getTranslation).filter(Boolean);
+    const rate = calibrate(translated);
+    const current = toOpenRouterId(game.settings.get(MODULE_ID, "provider"), game.settings.get(MODULE_ID, "model"));
+    let costs = [];
+    try {
+      const prices = await loadPrices();
+      costs = [...new Set([current, ...COMPARE_MODELS])]
+        .filter(id => prices.has(id))
+        .map(id => ({ name: prices.get(id).name, current: id === current, cost: estimateCost(totals, prices.get(id), rate).toFixed(2) }));
+    } catch (err) {
+      console.warn(`${MODULE_ID} | Preise nicht ladbar`, err);
+    }
+    return { pages: this.selected.size, words: totals.words.toLocaleString(), costs, calibrated: rate.calibrated, samples: rate.count };
+  }
+
+  #measure(page) {
+    if (!page) return;
+    const html = getOriginal(page);
+    const cached = this.measures.get(page.uuid);
+    if (cached?.html === html) return cached.measure;
+    const measure = measureHtml(html, pageContext(page));
+    this.measures.set(page.uuid, { html, measure });
+    return measure;
+  }
+
+  _onRender(context, options) {
+    for (const box of this.element.querySelectorAll("input[data-indeterminate]")) box.indeterminate = true;
+    if (options.parts.includes("controls")) {
+      const search = this.element.querySelector("input[name=search]");
+      search.addEventListener("input", foundry.utils.debounce(() => { this.search = search.value; this.render({ parts: ["list", "footer"] }); }, 250));
+      this.element.querySelector("select[name=filter]").addEventListener("change", ev => { this.filter = ev.target.value; this.render({ parts: ["list", "footer"] }); });
+    }
+  }
+
+  #rowUuids(target) {
+    const row = target.closest("[data-uuids]");
+    return row ? row.dataset.uuids.split(",") : [];
+  }
+
+  static #onToggleExpand(event, target) {
+    const { kind, id } = target.closest("[data-kind]").dataset;
+    const set = kind === "folder" ? this.collapsed : this.expanded;
+    set.has(id) ? set.delete(id) : set.add(id);
+    this.render({ parts: ["list"] });
+  }
+
+  static #onToggleSelect(event, target) {
+    const uuids = this.#rowUuids(target);
+    const select = target.checked;
+    for (const uuid of uuids) select ? this.selected.add(uuid) : this.selected.delete(uuid);
+    this.render({ parts: ["list", "footer"] });
+  }
+
+  static #onSelectOpen() {
+    const { visible } = buildRows({ folders: game.folders.filter(f => f.type === "JournalEntry"), entries: game.journal.contents, statusOf: this.statusOf, selected: this.selected, expanded: this.expanded, collapsed: this.collapsed, filter: "all", search: this.search });
+    for (const uuid of visible) {
+      if (["open", "partial", "error"].includes(this.statusOf(fromUuidSync(uuid)))) this.selected.add(uuid);
+    }
+    this.render({ parts: ["list", "footer"] });
+  }
+
+  static #onClearSelection() {
+    this.selected.clear();
+    this.render({ parts: ["list", "footer"] });
+  }
+
+  static async #onTranslate() {
+    const uuids = [...this.selected];
+    if (!uuids.length) return;
+    const pages = uuids.map(u => fromUuidSync(u)).filter(Boolean);
+    const again = pages.filter(p => ["translated", "partial"].includes(pageStatus(p))).length;
+    const edited = pages.filter(p => pageStatus(p) === "edited").length;
+    if (again || edited) {
+      const ok = await DialogV2.confirm({
+        window: { title: "VTTTRANSLATE.Center.ConfirmTitle" },
+        content: `<p>${game.i18n.format("VTTTRANSLATE.Center.ConfirmAgain", { again, edited })}</p>`
+      });
+      if (!ok) return;
+    }
+    this.selected.clear();
+    this.queue.add(pages.map(p => p.uuid));
+  }
+
+  static #onPause() { this.queue.pause(); }
+  static #onResume() { this.queue.resume(); }
+  static #onCancel() { this.queue.cancel(); }
+
+  static async #onRestore() {
+    const pages = [...this.selected].map(u => fromUuidSync(u)).filter(p => p && pageStatus(p) !== "open");
+    if (!pages.length) return ui.notifications.warn(game.i18n.localize("VTTTRANSLATE.Notify.NotTranslated"));
+    const ok = await DialogV2.confirm({
+      window: { title: "VTTTRANSLATE.Center.RestoreTitle" },
+      content: `<p>${game.i18n.format("VTTTRANSLATE.Center.ConfirmRestore", { count: pages.length })}</p>`
+    });
+    if (!ok) return;
+    for (const page of pages) await restorePage(page);
+    this.selected.clear();
+    ui.notifications.info(game.i18n.format("VTTTRANSLATE.Center.Restored", { count: pages.length }));
+    this.render({ parts: ["list", "footer"] });
+  }
+}

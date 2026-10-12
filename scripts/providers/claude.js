@@ -5,7 +5,7 @@ export function createClaudeProvider({ apiKey, model }) {
   const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
 
   return {
-    /** @returns {Promise<string>} JSON-Text gemäß schema */
+    /** @returns {Promise<{text: string, usage: {input: number, output: number}}>} */
     async translate({ system, input, schema }) {
       const response = await client.beta.messages.create({
         model,
@@ -22,7 +22,7 @@ export function createClaudeProvider({ apiKey, model }) {
       if (response.stop_reason === "max_tokens") throw new Error("Antwort zu lang (max_tokens erreicht).");
       const text = response.content.find(b => b.type === "text")?.text;
       if (!text) throw new Error("Leere Antwort von Claude.");
-      return text;
+      return { text, usage: { input: response.usage.input_tokens, output: response.usage.output_tokens } };
     }
   };
 }

@@ -1,0 +1,34 @@
+<footer class="vtt-footer">
+  <div class="vtt-summary">
+    <strong>{{localize "VTTTRANSLATE.Center.Selection" pages=summary.pages words=summary.words}}</strong>
+    {{#if summary.costs.length}}
+    <ul class="vtt-costs">
+      {{#each summary.costs}}<li class="{{#if current}}current{{/if}}">{{name}}: ~{{cost}} $</li>{{/each}}
+    </ul>
+    <small>{{#if summary.calibrated}}{{localize "VTTTRANSLATE.Center.Calibrated" count=summary.samples}}{{else}}{{localize "VTTTRANSLATE.Center.Rough"}}{{/if}}</small>
+    {{/if}}
+  </div>
+
+  {{#if queue.total}}
+  <div class="vtt-progress">
+    <progress value="{{queue.done}}" max="{{queue.total}}"></progress>
+    <span>{{queue.done}}/{{queue.total}} ({{queue.percent}} %){{#if queue.errors}} · {{localize "VTTTRANSLATE.Center.Errors" count=queue.errors}}{{/if}}</span>
+  </div>
+  {{/if}}
+
+  <div class="vtt-buttons">
+    <button type="button" data-action="restore"><i class="fa-solid fa-rotate-left"></i> {{localize "VTTTRANSLATE.Center.Restore"}}</button>
+    {{#if queue.running}}
+      {{#if queue.paused}}
+      <button type="button" data-action="resume"><i class="fa-solid fa-play"></i> {{localize "VTTTRANSLATE.Center.Resume"}}</button>
+      {{else}}
+      <button type="button" data-action="pause"><i class="fa-solid fa-pause"></i> {{localize "VTTTRANSLATE.Center.Pause"}}</button>
+      {{/if}}
+      <button type="button" data-action="cancel"><i class="fa-solid fa-stop"></i> {{localize "VTTTRANSLATE.Center.Cancel"}}</button>
+    {{else if queue.hasPending}}
+      <button type="button" data-action="resume"><i class="fa-solid fa-play"></i> {{localize "VTTTRANSLATE.Center.Resume"}}</button>
+      <button type="button" data-action="cancel"><i class="fa-solid fa-stop"></i> {{localize "VTTTRANSLATE.Center.Cancel"}}</button>
+    {{/if}}
+    <button type="button" class="vtt-primary" data-action="translate" {{#unless summary.pages}}disabled{{/unless}}><i class="fa-solid fa-language"></i> {{localize "VTTTRANSLATE.Center.Translate"}}</button>
+  </div>
+</footer>
