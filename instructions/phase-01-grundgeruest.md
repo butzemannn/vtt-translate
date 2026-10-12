@@ -1,6 +1,6 @@
 # Phase 1: Grundgerüst
 
-Status: **umgesetzt – manueller Test in Foundry offen**  ·  Gesamtplan: `plan.md`
+Status: **abgeschlossen**  ·  Gesamtplan: `plan.md`
 
 ## Ziel
 
@@ -45,7 +45,7 @@ Zentrale, Batch, Glossar-Editor, Prüf-Ansicht, Seitennamen, weitere Anbieter.
 - Umgesetzt wie geplant. Automatische Tests: 11/11 grün (alle 60 Sample-Seiten bleiben beim Zurückschreiben identisch).
 - v14-API: Knöpfe über Hook `getHeaderControlsJournalEntrySheet(app, controls)` mit `onClick`; aktuelle Seite über `app.pageId`.
 - Claude: SDK gebündelt (ADR 0001), Structured Output (`output_config.format`), Fallback-Modell bei Ablehnung (`fallbacks: "default"`).
-- Offen: Test in Foundry durch Nutzer, Probeübersetzung Opus vs. Sonnet (`tools/try-page.js`).
+- Zusätzlich OpenRouter als Anbieter (0.2.0). Test in Foundry mit DeepSeek über OpenRouter erfolgreich (2026-10-12).
 
 ## Fertig, wenn
 

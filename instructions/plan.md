@@ -1,6 +1,6 @@
 # Plan: Foundry-Addon „vtt-translate“
 
-Status: **Phase 1 umgesetzt, Test offen**  ·  Stand: 2026-10-12
+Status: **Phase 1 abgeschlossen, Phase 2 als Nächstes**  ·  Stand: 2026-10-12
 
 Ablage-System in `instructions/`:
 - `prompt.md`, `guidelines.md` – Vorgaben (nicht ändern)
@@ -146,6 +146,6 @@ Sehr grob; das Addon zeigt vor jedem Lauf eine Schätzung. Batch-API (−50 %) s
 ## Offene Punkte
 
 - [x] Beispiel-Journale analysiert → siehe „Befund aus `samples/`“.
-- [ ] Standardmodell: Opus 5.5 vs. Sonnet 5.5 → Probeübersetzung vergleichen.
+- [x] Modell: Nutzer verwendet DeepSeek über OpenRouter, Test in Foundry erfolgreich (2026-10-12).
 - [x] Claude-Anbindung: SDK vorgebündelt → `docs/adr/0001-kein-build-schritt.md`.
 - [x] Erfahrungen mit Phils Journal Translator → siehe „Harte Anforderungen“.
