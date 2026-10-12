@@ -67,3 +67,13 @@ test("Blöcke nur aus Links ohne Label werden übersprungen", () => {
   const { blocks } = splitBlocks(`<ul><li><p><em>@UUID[JournalEntry.a]</em></p></li><li><p>Dagger</p></li></ul>`);
   assert.deepEqual(blocks.map(b => b.html), ["Dagger"]);
 });
+
+test("Blöcke für den Vergleich paaren", async () => {
+  const { pairBlocks } = await import("../scripts/html.js");
+  const pairs = pairBlocks(`<blockquote><p>You enter.</p></blockquote><p>DC 15</p>`, `<blockquote><p>Ihr tretet ein.</p></blockquote><p>SG 15</p>`);
+  assert.deepEqual(pairs, [
+    { type: "readaloud", original: "You enter.", translated: "Ihr tretet ein." },
+    { type: "text", original: "DC 15", translated: "SG 15" }
+  ]);
+  assert.equal(pairBlocks(`<p>a</p><p>b</p>`, `<p>a b</p>`), null);
+});

@@ -10,6 +10,10 @@
 | `scripts/estimate.js` | Kostenschätzung ([ADR 0004](adr/0004-kostenschaetzung.md)) |
 | `scripts/ui/center.js`, `templates/center/` | Übersetzungs-Zentrale |
 | `scripts/ui/rows.js` | Baumzeilen der Zentrale: Filter, Auswahl, Statussummen |
+| `scripts/glossary.js` | Glossar: relevante Einträge je Seite, Vorschläge per LLM ([ADR 0005](adr/0005-glossar.md)) |
+| `scripts/ui/glossary-editor.js`, `templates/glossary/` | Glossar-Editor |
+| `scripts/ui/review.js`, `templates/review.hbs` | Prüf-Ansicht (Blöcke gepaart über `pairBlocks`) |
+| `scripts/ui/windows.js` | Einzelinstanzen von Glossar und Prüf-Ansicht |
 | `scripts/translator.js` | Prompt, Anfrage, Prüfung, Wiederholung |
 | `scripts/html.js` | HTML in Blöcke zerlegen / zusammensetzen ([ADR 0003](adr/0003-blockweise-uebersetzung.md)) |
 | `scripts/store.js` | Übersetzung speichern, Original sichern/wiederherstellen ([ADR 0002](adr/0002-original-als-flag.md)) |
@@ -29,6 +33,7 @@
 |---|---|
 | offen | kein Flag |
 | übersetzt / teilweise | aus Flag; teilweise = einzelne Absätze englisch geblieben |
+| geprüft | in der Prüf-Ansicht abgenommen (`reviewed`); übernimmt auch Handänderungen |
 | von Hand geändert | Inhalt passt nicht mehr zum gespeicherten Hash |
 | wartet / in Arbeit / Fehler | nur in der Warteschlange (Fehler bis zum nächsten Versuch) |
 
@@ -36,4 +41,5 @@
 
 - Seite: `flags.vtt-translate.translation = { original, status, hash, model, usage, measure, duration, translatedAt }`
   - `usage` = echte Tokens, `measure` = Zeichenzahlen der Anfrage, `duration` = Sekunden → Kalibrierung von Kosten- und Zeitschätzung
+- World-Setting `vtt-translate.glossary = { entries: [{ source, target, kind, suggested? }] }`
 - Client-Setting `vtt-translate.queue = { pending: [uuid], errors: {uuid: text} }` – nach Neuladen pausiert, „Fortsetzen“ startet erneut

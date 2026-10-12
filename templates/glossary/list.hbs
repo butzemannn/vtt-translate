@@ -1,0 +1,21 @@
+<div class="vtt-list-scroll">
+  <p class="vtt-hint">{{localize "VTTTRANSLATE.Glossary.Hint"}}</p>
+  <table class="vtt-glossary">
+    <thead><tr><th>{{localize "VTTTRANSLATE.Glossary.Source"}}</th><th>{{localize "VTTTRANSLATE.Glossary.Target"}}</th><th>{{localize "VTTTRANSLATE.Glossary.KindLabel"}}</th><th></th></tr></thead>
+    <tbody>
+      {{#each entries}}
+      <tr data-index="{{index}}" class="{{#if suggested}}suggested{{/if}}">
+        <td><input type="text" data-field="source" value="{{source}}"></td>
+        <td><input type="text" data-field="target" value="{{target}}" placeholder="{{source}}"></td>
+        <td><select data-field="kind">{{#each kinds}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></td>
+        <td class="vtt-actions">
+          {{#if suggested}}<a data-action="accept" data-tooltip="{{localize 'VTTTRANSLATE.Glossary.Accept'}}"><i class="fa-solid fa-check"></i></a>{{/if}}
+          <a data-action="remove" data-tooltip="{{localize 'VTTTRANSLATE.Glossary.Remove'}}"><i class="fa-solid fa-xmark"></i></a>
+        </td>
+      </tr>
+      {{else}}
+      <tr><td colspan="4" class="vtt-empty">{{localize "VTTTRANSLATE.Glossary.Empty"}}</td></tr>
+      {{/each}}
+    </tbody>
+  </table>
+</div>

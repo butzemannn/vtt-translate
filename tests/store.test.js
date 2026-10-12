@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { hashText, pageStatus, saveTranslation, restoreOriginal, getOriginal } from "../scripts/store.js";
+import { hashText, pageStatus, saveTranslation, restoreOriginal, getOriginal, setReviewed } from "../scripts/store.js";
 
 // Minimale Seiten-Attrappe mit Foundry-ähnlichem update()/getFlag()/unsetFlag().
 function fakePage(content) {
@@ -44,4 +44,15 @@ test("Status: offen → übersetzt → von Hand geändert → wiederhergestellt"
   assert.equal(await restoreOriginal(page), true);
   assert.equal(page.text.content, "<p>Hello</p>");
   assert.equal(pageStatus(page), "open");
+});
+
+test("Geprüft: übernimmt Handänderungen, neue Übersetzung setzt zurück", async () => {
+  const page = fakePage("<p>Hello</p>");
+  await saveTranslation(page, "<p>Hallo</p>", { model: "m", failed: 0 });
+  page.text.content = "<p>Hallo!</p>";
+  assert.equal(pageStatus(page), "edited");
+  await setReviewed(page);
+  assert.equal(pageStatus(page), "reviewed");
+  await saveTranslation(page, "<p>Servus</p>", { model: "m", failed: 0 });
+  assert.equal(pageStatus(page), "translated");
 });

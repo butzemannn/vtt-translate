@@ -1,0 +1,43 @@
+<div class="vtt-review">
+  {{#if empty}}
+  <p class="vtt-empty">{{localize "VTTTRANSLATE.Review.Empty"}}</p>
+  {{else}}
+  <header class="vtt-review-header">
+    <button type="button" data-action="prev" {{#unless hasPrev}}disabled{{/unless}}><i class="fa-solid fa-chevron-left"></i></button>
+    <div class="vtt-review-title">
+      <strong>{{page.name}}</strong> <small>{{page.journal}} · {{position}}</small>
+    </div>
+    <span class="vtt-review-status status-{{status}}"><i class="vtt-status {{icon}}"></i> {{statusLabel}}</span>
+    <button type="button" data-action="next" {{#unless hasNext}}disabled{{/unless}}><i class="fa-solid fa-chevron-right"></i></button>
+  </header>
+
+  <div class="vtt-compare">
+    <div class="vtt-compare-head"><span>{{localize "VTTTRANSLATE.Review.Original"}}</span><span>{{localize "VTTTRANSLATE.Review.Translation"}}</span></div>
+    {{#if pairs}}
+      {{#each pairs}}
+      <div class="vtt-pair {{type}}">
+        <div class="vtt-cell">{{{original}}}</div>
+        <div class="vtt-cell" lang="de">{{{translated}}}</div>
+      </div>
+      {{/each}}
+    {{else}}
+      <div class="vtt-pair">
+        <div class="vtt-cell">{{{originalHtml}}}</div>
+        <div class="vtt-cell" lang="de">{{#if translatedOnly}}<em>{{localize "VTTTRANSLATE.Review.NotTranslated"}}</em>{{else}}{{{translatedHtml}}}{{/if}}</div>
+      </div>
+    {{/if}}
+  </div>
+
+  <footer class="vtt-review-footer">
+    <input type="text" name="hint" placeholder="{{localize 'VTTTRANSLATE.Review.HintPlaceholder'}}" {{#if busy}}disabled{{/if}}>
+    <button type="button" data-action="retranslate" {{#if busy}}disabled{{/if}}>
+      <i class="fa-solid {{#if busy}}fa-spinner fa-spin{{else}}fa-language{{/if}}"></i> {{#if translatedOnly}}{{localize "VTTTRANSLATE.Center.Translate"}}{{else}}{{localize "VTTTRANSLATE.Review.Retranslate"}}{{/if}}
+    </button>
+    {{#unless translatedOnly}}
+    <button type="button" data-action="restore" {{#if busy}}disabled{{/if}}><i class="fa-solid fa-rotate-left"></i> {{localize "VTTTRANSLATE.Review.Restore"}}</button>
+    <button type="button" data-action="edit" {{#if busy}}disabled{{/if}}><i class="fa-solid fa-pen"></i> {{localize "VTTTRANSLATE.Review.Edit"}}</button>
+    <button type="button" class="vtt-primary" data-action="approve" {{#if busy}}disabled{{/if}}><i class="fa-solid fa-user-check"></i> {{localize "VTTTRANSLATE.Review.Approve"}}</button>
+    {{/unless}}
+  </footer>
+  {{/if}}
+</div>

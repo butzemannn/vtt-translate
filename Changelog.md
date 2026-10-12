@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 – 2026-10-12
+
+- **Glossar** (Zentrale → Glossar): Namen und Begriffe EN → DE, leeres Deutsch = bleibt; wird beim Übersetzen strikt verwendet (nur Einträge, die auf der Seite vorkommen)
+- **Namen vorschlagen**: LLM liest die ausgewählten Seiten und schlägt Glossar-Einträge vor; Vorschläge gelten erst nach dem Übernehmen
+- **Prüf-Ansicht**: Original und Übersetzung absatzweise nebeneinander; Geprüft, Bearbeiten, Neu übersetzen mit Hinweis, Original wiederherstellen; Start aus der Zentrale oder dem Journal-Menü
+- Neuer Status „Geprüft“
+- Glossar und Hinweis stehen in der Anfrage statt im System-Prompt (Prompt-Caching beim Anbieter)
+
 ## 0.3.1 – 2026-10-12
 
 - Zentrale: Restzeit während des Laufs und geschätzte Dauer der Auswahl (aus gemessener Dauer pro Seite, ab 3 Seiten)

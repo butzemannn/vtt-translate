@@ -1,0 +1,11 @@
+<div class="vtt-controls">
+  <select name="filter">
+    {{#each filters}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
+  </select>
+  <input type="search" name="search" value="{{search}}" placeholder="{{localize 'VTTTRANSLATE.Center.Search'}}">
+  <button type="button" data-action="add"><i class="fa-solid fa-plus"></i> {{localize "VTTTRANSLATE.Glossary.Add"}}</button>
+  {{#if suggested}}
+  <button type="button" data-action="acceptAll"><i class="fa-solid fa-check-double"></i> {{localize "VTTTRANSLATE.Glossary.AcceptAll" count=suggested}}</button>
+  <button type="button" data-action="rejectAll" data-tooltip="{{localize 'VTTTRANSLATE.Glossary.RejectAll'}}"><i class="fa-solid fa-trash"></i></button>
+  {{/if}}
+</div>

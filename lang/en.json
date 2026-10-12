@@ -35,7 +35,8 @@
       "translated": "Translated",
       "partial": "Partial",
       "edited": "Edited by hand",
-      "error": "Error"
+      "error": "Error",
+      "reviewed": "Reviewed"
     },
     "Center": {
       "Title": "Translation Center",
@@ -59,7 +60,51 @@
       "ConfirmRestore": "The English original text will be restored on {count} pages.",
       "Restored": "{count} pages restored.",
       "Duration": "about {time}",
-      "Remaining": "about {time} left"
+      "Remaining": "about {time} left",
+      "SelectFirst": "Please select pages first."
+    },
+    "Glossary": {
+      "Title": "Glossary",
+      "Kind": {
+        "name": "Name",
+        "item": "Item",
+        "rules": "Rules"
+      },
+      "KindLabel": "Kind",
+      "Filter": {
+        "all": "All",
+        "suggested": "Suggestions",
+        "confirmed": "Confirmed"
+      },
+      "Add": "New",
+      "AcceptAll": "Accept all {count}",
+      "RejectAll": "Discard all suggestions",
+      "Accept": "Accept",
+      "Remove": "Delete",
+      "Hint": "Confirmed entries are used strictly when translating. Empty German = keep unchanged. Suggestions (highlighted) apply only after accepting.",
+      "Source": "English",
+      "Target": "German",
+      "Empty": "No entries.",
+      "Suggest": "Suggest names",
+      "SuggestTooltip": "The LLM looks for names and terms in the selected pages and suggests German renderings.",
+      "SuggestTitle": "Suggest names?",
+      "SuggestConfirm": "The LLM reads {count} pages and suggests glossary entries. This costs about a third of translating these pages.",
+      "Suggesting": "Looking for names and terms …",
+      "Suggested": "{count} new suggestions in the glossary.",
+      "SuggestError": "Suggestions failed: {error}"
+    },
+    "Review": {
+      "Title": "Review translation",
+      "Open": "Review",
+      "Empty": "No translated pages to review.",
+      "Original": "Original",
+      "Translation": "Translation",
+      "NotTranslated": "Not translated yet.",
+      "HintPlaceholder": "Hint for a new translation, e.g. \"more formal\"",
+      "Retranslate": "Translate again",
+      "Restore": "Original",
+      "Edit": "Edit",
+      "Approve": "Reviewed"
     }
   }
 }

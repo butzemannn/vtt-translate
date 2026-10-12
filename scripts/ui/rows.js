@@ -6,6 +6,7 @@ export const STATUS = {
   queued: { icon: "fa-regular fa-clock" },
   active: { icon: "fa-solid fa-spinner fa-spin" },
   translated: { icon: "fa-solid fa-circle-check" },
+  reviewed: { icon: "fa-solid fa-user-check" },
   partial: { icon: "fa-solid fa-circle-half-stroke" },
   edited: { icon: "fa-solid fa-pen" },
   error: { icon: "fa-solid fa-triangle-exclamation" }
@@ -18,7 +19,7 @@ const parentId = doc => doc.folder?.id ?? doc.folder ?? null;
 export function summarize(statuses) {
   const count = s => statuses.filter(x => x === s).length;
   const total = statuses.length;
-  const done = count("translated") + count("edited");
+  const done = count("translated") + count("edited") + count("reviewed");
   let status = "open";
   if (count("active") || count("queued")) status = "active";
   else if (count("error")) status = "error";

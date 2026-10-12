@@ -1,0 +1,93 @@
+// Glossar: einheitliche Namen/Begriffe. Einträge {source, target, kind, suggested?}; leeres target = bleibt.
+// Ohne Foundry-Abhängigkeit (Speichern macht der Aufrufer).
+import { parseJson } from "./translator.js";
+
+const SUGGEST_PROMPT = `You prepare a glossary for translating a Dungeons & Dragons 5e adventure (Curse of Strahd, gothic horror) from English into German.
+
+List every term in the text that must be translated consistently:
+- proper names of persons, places, organizations, ships, deities (kind "name")
+- named or notable items, artifacts, books (kind "item")
+- spells, monsters, conditions, rules terms (kind "rules")
+
+For each give the German rendering:
+- personal names and place names that are real names (e.g. "Strahd von Zarovich", "Barovia", "Vallaki") stay unchanged
+- descriptive names get a fitting German name (e.g. "Raven Cane" → "Rabenstock")
+- spells, monsters, conditions and rules terms use the official German D&D 5e names
+Skip common words. Each term once. Answer only with JSON: {"terms": [{"source": "...", "target": "...", "kind": "name|item|rules"}]}`;
+
+const SUGGEST_SCHEMA = {
+  type: "object",
+  properties: {
+    terms: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: { source: { type: "string" }, target: { type: "string" }, kind: { type: "string", enum: ["name", "item", "rules"] } },
+        required: ["source", "target", "kind"],
+        additionalProperties: false
+      }
+    }
+  },
+  required: ["terms"],
+  additionalProperties: false
+};
+
+// Zeichen pro Anfrage für Vorschläge (ca. 10k Tokens).
+const CHUNK_CHARS = 40000;
+
+const key = term => term.trim().toLowerCase();
+
+/** Bestätigte Einträge, die im Text vorkommen (nur diese gehen in den Prompt). */
+export function relevantTerms(glossary, text) {
+  const haystack = text.toLowerCase();
+  return glossary.filter(g => !g.suggested && g.source && haystack.includes(key(g.source)));
+}
+
+/** Neue Vorschläge anhängen; vorhandene Einträge (auch bestätigte) bleiben unverändert. */
+export function mergeSuggestions(glossary, terms) {
+  const known = new Set(glossary.map(g => key(g.source)));
+  const added = [];
+  for (const t of terms) {
+    const source = t.source?.trim();
+    if (!source || known.has(key(source))) continue;
+    known.add(key(source));
+    added.push({ source, target: t.target?.trim() === source ? "" : (t.target?.trim() ?? ""), kind: t.kind ?? "name", suggested: true });
+  }
+  return { glossary: [...glossary, ...added], added: added.length };
+}
+
+/** Texte in Pakete bis maxChars aufteilen (ein sehr langer Text bildet ein eigenes Paket). */
+export function chunkTexts(texts, maxChars = CHUNK_CHARS) {
+  const chunks = [];
+  let current = "";
+  for (const text of texts) {
+    if (current && current.length + text.length > maxChars) {
+      chunks.push(current);
+      current = "";
+    }
+    current += (current ? "\n\n---\n\n" : "") + text;
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+/**
+ * Fragt Glossar-Vorschläge für Texte ab.
+ * @param {{texts: string[], provider: object, known?: string[], onProgress?: (done: number, total: number) => void}} args
+ * @returns {Promise<{terms: object[], usage: {input: number, output: number}}>}
+ */
+export async function suggestTerms({ texts, provider, known = [], onProgress = () => {} }) {
+  const chunks = chunkTexts(texts.filter(Boolean));
+  const terms = [];
+  const usage = { input: 0, output: 0 };
+  for (let i = 0; i < chunks.length; i++) {
+    // Bereits bekannte Begriffe mitschicken, damit sie nicht erneut vorgeschlagen werden.
+    const input = JSON.stringify({ known: known.slice(0, 500), text: chunks[i] });
+    const res = await provider.translate({ system: SUGGEST_PROMPT, input, schema: SUGGEST_SCHEMA });
+    usage.input += res.usage?.input ?? 0;
+    usage.output += res.usage?.output ?? 0;
+    terms.push(...(parseJson(res.text).terms ?? []));
+    onProgress(i + 1, chunks.length);
+  }
+  return { terms, usage };
+}

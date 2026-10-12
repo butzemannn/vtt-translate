@@ -22,14 +22,51 @@
 .vtt-translate-center .vtt-costs .current { font-weight: bold; }
 .vtt-translate-center .vtt-progress { display: flex; align-items: center; gap: 0.5rem; }
 .vtt-translate-center .vtt-progress progress { flex: 1; }
-.vtt-translate-center .vtt-buttons { display: flex; gap: 0.25rem; justify-content: flex-end; }
+.vtt-translate-center .vtt-buttons { display: flex; gap: 0.5rem; justify-content: space-between; flex-wrap: wrap; }
+.vtt-translate-center .vtt-button-group { display: flex; gap: 0.25rem; }
 .vtt-translate-center .vtt-buttons button { flex: 0 0 auto; width: auto; }
 .vtt-translate-center .vtt-buttons .vtt-primary { font-weight: bold; }
+
+/* Gemeinsam: Kopfzeile mit Filter/Suche in Glossar */
+.vtt-translate-glossary .window-content { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.5rem; overflow: hidden; }
+.vtt-translate-glossary .vtt-controls { flex: 0 0 auto; display: flex; gap: 0.25rem; align-items: center; height: 2rem; }
+.vtt-translate-glossary .vtt-controls > * { height: 100%; margin: 0; box-sizing: border-box; }
+.vtt-translate-glossary .vtt-controls select { flex: 0 0 auto; width: auto; }
+.vtt-translate-glossary .vtt-controls input[type="search"] { flex: 1 1 auto; min-width: 0; width: auto; padding: 0 0.5rem; }
+.vtt-translate-glossary .vtt-controls button { flex: 0 0 auto; width: auto; padding: 0 0.6rem; white-space: nowrap; }
+.vtt-translate-glossary .vtt-list-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.vtt-translate-glossary .vtt-hint { margin: 0 0 0.4rem; font-size: 0.85em; opacity: 0.8; }
+.vtt-translate-glossary .vtt-glossary { width: 100%; border-collapse: collapse; margin: 0; }
+.vtt-translate-glossary .vtt-glossary th { text-align: left; }
+.vtt-translate-glossary .vtt-glossary td { padding: 2px; }
+.vtt-translate-glossary .vtt-glossary input, .vtt-translate-glossary .vtt-glossary select { width: 100%; }
+.vtt-translate-glossary .vtt-glossary tr.suggested td { background: rgba(208, 138, 30, 0.15); }
+.vtt-translate-glossary .vtt-actions { white-space: nowrap; width: 3.5rem; text-align: center; }
+.vtt-translate-glossary .vtt-actions a { margin: 0 0.25rem; cursor: pointer; }
+.vtt-translate-glossary .vtt-empty { text-align: center; opacity: 0.7; padding: 1rem; }
+
+/* Prüf-Ansicht */
+.vtt-translate-review .window-content { padding: 0; overflow: hidden; }
+.vtt-translate-review .vtt-review { display: flex; flex-direction: column; height: 100%; }
+.vtt-translate-review .vtt-review-header, .vtt-translate-review .vtt-review-footer { flex: 0 0 auto; display: flex; gap: 0.5rem; align-items: center; padding: 0.5rem; }
+.vtt-translate-review .vtt-review-header button, .vtt-translate-review .vtt-review-footer button { flex: 0 0 auto; width: auto; white-space: nowrap; }
+.vtt-translate-review .vtt-review-title { flex: 1; }
+.vtt-translate-review .vtt-review-footer { border-top: 1px solid var(--color-border-light-tertiary, #8884); }
+.vtt-translate-review .vtt-review-footer input { flex: 1; min-width: 0; }
+.vtt-translate-review .vtt-review-footer .vtt-primary { font-weight: bold; }
+.vtt-translate-review .vtt-compare { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 0.5rem; }
+.vtt-translate-review .vtt-compare-head, .vtt-translate-review .vtt-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.vtt-translate-review .vtt-compare-head { position: sticky; top: 0; font-weight: bold; background: var(--color-cool-5, #222); padding: 0.25rem 0; z-index: 1; }
+.vtt-translate-review .vtt-pair { padding: 0.35rem 0; border-bottom: 1px solid var(--color-border-light-tertiary, #8884); }
+.vtt-translate-review .vtt-pair.readaloud .vtt-cell { background: rgba(255, 255, 240, 0.9); color: #222; padding: 0.35rem 0.6rem; border-left: 3px solid #b9a87a; }
+.vtt-translate-review .vtt-cell img { max-width: 100%; height: auto; }
+.vtt-translate-review .vtt-empty { padding: 2rem; text-align: center; opacity: 0.7; }
 
 /* Statusfarben (Zentrale und Seitenleiste) */
 .status-translated > .vtt-status, .vtt-translate-status.status-translated { color: #3a9a4a; }
 .status-partial > .vtt-status, .vtt-translate-status.status-partial { color: #d08a1e; }
-.status-edited > .vtt-status, .vtt-translate-status.status-edited { color: #3b7dd8; }
+.status-edited > .vtt-status, .vtt-translate-status.status-edited, .vtt-review-status.status-edited { color: #3b7dd8; }
+.status-reviewed > .vtt-status, .vtt-translate-status.status-reviewed, .vtt-review-status.status-reviewed { color: #2e7d6b; }
 .status-error > .vtt-status, .vtt-translate-status.status-error { color: #c8392b; }
 .status-open > .vtt-status { opacity: 0.4; }
 

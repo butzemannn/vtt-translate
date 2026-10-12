@@ -1,6 +1,6 @@
 # Phase 2: Übersetzungs-Zentrale + Batch
 
-Status: **umgesetzt (0.3.0) – Test in Foundry offen**  ·  Gesamtplan: `plan.md`
+Status: **abgeschlossen (0.3.1)**  ·  Gesamtplan: `plan.md`
 
 ## Ziel
 

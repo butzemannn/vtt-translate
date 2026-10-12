@@ -29,3 +29,24 @@ test("footer.hbs und controls.hbs rendern", () => {
   assert.match(render("footer", { summary: { pages: 1, words: "1", costs: [], time: "5 Min." }, queue: { total: 2, done: 1, running: true, eta: "3 Min." } }), /Remaining.*3 Min/);
   assert.match(render("controls", { filters: [{ value: "all", label: "Alle", selected: true }] }), /<option value="all" selected>/);
 });
+
+const renderFile = (file, ctx) => Handlebars.compile(readFileSync(new URL(`../templates/${file}.hbs`, import.meta.url), "utf8"))(ctx);
+
+test("Glossar-Templates rendern Vorschläge und Felder", () => {
+  const kinds = [{ value: "name", label: "Name", selected: true }];
+  const list = renderFile("glossary/list", { entries: [{ index: 3, source: "Raven Cane", target: "", kind: "name", suggested: true, kinds }] });
+  assert.match(list, /data-index="3" class="suggested"/);
+  assert.match(list, /data-action="accept"/);
+  assert.match(list, /placeholder="Raven Cane"/);
+  assert.match(renderFile("glossary/controls", { filters: [], suggested: 2 }), /acceptAll/);
+});
+
+test("Prüf-Ansicht rendert Paare und Rückfall auf ganze Seite", () => {
+  const paired = renderFile("review", { page: { name: "Foyer", journal: "Manor" }, pairs: [{ type: "readaloud", original: "<b>You</b>", translated: "<b>Ihr</b>" }], hasNext: true });
+  assert.match(paired, /vtt-pair readaloud/);
+  assert.match(paired, /<b>Ihr<\/b>/);
+  assert.match(paired, /data-action="approve"/);
+  const open = renderFile("review", { page: { name: "X" }, translatedOnly: true, originalHtml: "<p>a</p>" });
+  assert.doesNotMatch(open, /data-action="approve"/);
+  assert.match(renderFile("review", { empty: true }), /Review.Empty/);
+});

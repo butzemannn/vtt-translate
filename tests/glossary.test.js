@@ -1,0 +1,51 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { samplePages } from "./setup.js";
+import { relevantTerms, mergeSuggestions, chunkTexts, suggestTerms } from "../scripts/glossary.js";
+import { plainText } from "../scripts/html.js";
+
+const glossary = [
+  { source: "Count Lugosi", target: "", kind: "name" },
+  { source: "Raven Cane", target: "Rabenstock", kind: "item" },
+  { source: "Igor", target: "", kind: "name", suggested: true }
+];
+
+test("Nur bestätigte, im Text vorkommende Einträge", () => {
+  const terms = relevantTerms(glossary, "The raven cane belongs to Igor.");
+  assert.deepEqual(terms.map(t => t.source), ["Raven Cane"]);
+});
+
+test("Vorschläge: nur neue, als Vorschlag markiert, gleiches Ziel = bleibt", () => {
+  const { glossary: merged, added } = mergeSuggestions(glossary, [
+    { source: "raven cane", target: "Rabenstab", kind: "item" },
+    { source: "Dr. Seward", target: "Dr. Seward", kind: "name" },
+    { source: "Dr. Seward", target: "x", kind: "name" }
+  ]);
+  assert.equal(added, 1);
+  assert.deepEqual(merged.at(-1), { source: "Dr. Seward", target: "", kind: "name", suggested: true });
+  assert.equal(merged.find(g => g.source === "Raven Cane").target, "Rabenstock", "Bestehendes bleibt");
+});
+
+test("Texte werden in Pakete geteilt", () => {
+  assert.deepEqual(chunkTexts(["aaaa", "bbbb", "cc"], 9).length, 2);
+  assert.deepEqual(chunkTexts(["x".repeat(20)], 9), ["x".repeat(20)]);
+});
+
+test("Reiner Text ohne Tags und Link-Ziele", () => {
+  const text = plainText(`<p>Door to @UUID[.abc]{Treasure Room} and @UUID[JournalEntry.x]</p><p>Roll [[/r 1d6]]</p>`);
+  assert.equal(text, "Door to Treasure Room and \nRoll");
+  const foyer = plainText(samplePages().find(p => p.name === "Foyer").html);
+  assert.match(foyer, /Count Lugosi/);
+  assert.doesNotMatch(foyer, /</);
+});
+
+test("suggestTerms fragt pro Paket und sammelt Begriffe", async () => {
+  const inputs = [];
+  const provider = { async translate({ input }) { inputs.push(JSON.parse(input)); return { text: JSON.stringify({ terms: [{ source: `T${inputs.length}`, target: "", kind: "name" }] }), usage: { input: 1, output: 1 } }; } };
+  const progress = [];
+  const result = await suggestTerms({ texts: ["a".repeat(30000), "b".repeat(30000)], provider, known: ["Strahd"], onProgress: (d, t) => progress.push(`${d}/${t}`) });
+  assert.equal(inputs.length, 2);
+  assert.deepEqual(inputs[0].known, ["Strahd"]);
+  assert.deepEqual(result.terms.map(t => t.source), ["T1", "T2"]);
+  assert.deepEqual(progress, ["1/2", "2/2"]);
+});

@@ -17,6 +17,12 @@
   {{/if}}
 
   <div class="vtt-buttons">
+    <div class="vtt-button-group">
+      <button type="button" data-action="glossary"><i class="fa-solid fa-book-atlas"></i> {{localize "VTTTRANSLATE.Glossary.Title"}}</button>
+      <button type="button" data-action="suggest" {{#if suggesting}}disabled{{/if}} data-tooltip="{{localize 'VTTTRANSLATE.Glossary.SuggestTooltip'}}"><i class="fa-solid {{#if suggesting}}fa-spinner fa-spin{{else}}fa-wand-magic-sparkles{{/if}}"></i> {{localize "VTTTRANSLATE.Glossary.Suggest"}}</button>
+      <button type="button" data-action="review"><i class="fa-solid fa-magnifying-glass"></i> {{localize "VTTTRANSLATE.Review.Open"}}</button>
+    </div>
+    <div class="vtt-button-group">
     <button type="button" data-action="restore"><i class="fa-solid fa-rotate-left"></i> {{localize "VTTTRANSLATE.Center.Restore"}}</button>
     {{#if queue.running}}
       {{#if queue.paused}}
@@ -30,5 +36,6 @@
       <button type="button" data-action="cancel"><i class="fa-solid fa-stop"></i> {{localize "VTTTRANSLATE.Center.Cancel"}}</button>
     {{/if}}
     <button type="button" class="vtt-primary" data-action="translate" {{#unless summary.pages}}disabled{{/unless}}><i class="fa-solid fa-language"></i> {{localize "VTTTRANSLATE.Center.Translate"}}</button>
+    </div>
   </div>
 </footer>

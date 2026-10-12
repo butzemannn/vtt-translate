@@ -27,13 +27,23 @@ export function isTranslated(page) {
 
 /**
  * Status einer Seite aus den gespeicherten Daten.
- * @returns {"open"|"translated"|"partial"|"edited"}
+ * @returns {"open"|"translated"|"partial"|"edited"|"reviewed"}
  */
 export function pageStatus(page) {
   const data = getTranslation(page);
   if (!data) return "open";
   if (data.hash && data.hash !== hashText(page.text.content ?? "")) return "edited";
+  if (data.reviewed) return "reviewed";
   return data.status;
+}
+
+/** Markiert die Übersetzung als geprüft; Handänderungen gelten damit als abgenommen (neuer Hash). */
+export async function setReviewed(page) {
+  if (!getTranslation(page)) return;
+  await page.update({
+    [`flags.${MODULE_ID}.${FLAG}.reviewed`]: true,
+    [`flags.${MODULE_ID}.${FLAG}.hash`]: hashText(page.text.content ?? "")
+  });
 }
 
 /**
@@ -50,6 +60,7 @@ export async function saveTranslation(page, html, { model, failed, usage, measur
       usage,
       measure,
       duration,
+      reviewed: false,
       translatedAt: Date.now()
     }
   });

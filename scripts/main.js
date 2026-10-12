@@ -4,6 +4,7 @@ import { translatePage, restorePage } from "./actions.js";
 import { TranslationQueue } from "./queue.js";
 import { TranslationCenter } from "./ui/center.js";
 import { STATUS, summarize } from "./ui/rows.js";
+import { openGlossary, openReview, refreshWindows } from "./ui/windows.js";
 
 const running = new Set();
 let queue;
@@ -36,6 +37,7 @@ Hooks.once("init", () => {
   });
   // Offene Batch-Seiten, damit ein Lauf nach Neuladen fortgesetzt werden kann.
   game.settings.register(MODULE_ID, "queue", { scope: "client", config: false, type: Object, default: {} });
+  game.settings.register(MODULE_ID, "glossary", { scope: "world", config: false, type: Object, default: { entries: [] } });
 });
 
 Hooks.once("ready", () => {
@@ -50,7 +52,7 @@ Hooks.once("ready", () => {
     save: state => game.settings.set(MODULE_ID, "queue", state),
     onChange: () => center?.refresh()
   });
-  game.modules.get(MODULE_ID).api = { openCenter };
+  game.modules.get(MODULE_ID).api = { openCenter, openGlossary, openReview };
   ui.journal?.render(); // Seitenleiste wurde vor "ready" ohne Knopf gerendert
   if (queue.pending.length) ui.notifications.info(game.i18n.format("VTTTRANSLATE.Notify.Resumable", { count: queue.pending.length }));
 });
@@ -61,7 +63,10 @@ function openCenter() {
 }
 
 // Änderungen an Seiten (auch von Hand) in der Zentrale nachziehen.
-Hooks.on("updateJournalEntryPage", () => center?.refresh());
+Hooks.on("updateJournalEntryPage", () => {
+  center?.refresh();
+  refreshWindows();
+});
 
 // Seitenleiste: Knopf zur Zentrale und Status-Symbol je Journal.
 Hooks.on("renderJournalDirectory", (app, html) => {
@@ -98,6 +103,12 @@ Hooks.on("getHeaderControlsJournalEntrySheet", (app, controls) => {
       icon: "fa-solid fa-language",
       label: "VTTTRANSLATE.Controls.Translate",
       onClick: () => translateCurrent(currentPage(app))
+    },
+    {
+      action: "vttReviewPage",
+      icon: "fa-solid fa-magnifying-glass",
+      label: "VTTTRANSLATE.Review.Open",
+      onClick: () => openReview([currentPage(app)?.uuid].filter(Boolean))
     },
     {
       action: "vttRestorePage",

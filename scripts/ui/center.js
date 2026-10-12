@@ -1,9 +1,12 @@
 // Übersetzungs-Zentrale: alle Journale mit Status, Auswahl, Kostenschätzung und Batch-Steuerung.
 import { MODULE_ID, pageStatus, getOriginal, getTranslation } from "../store.js";
+import { plainText } from "../html.js";
+import { suggestTerms, mergeSuggestions } from "../glossary.js";
+import { openGlossary, openReview } from "./windows.js";
 import { measureHtml } from "../translator.js";
 import { loadPrices, calibrate, estimateCost, estimateSeconds, formatDuration, toOpenRouterId, COMPARE_MODELS } from "../estimate.js";
 import { buildRows, STATUS } from "./rows.js";
-import { pageContext, restorePage } from "../actions.js";
+import { pageContext, restorePage, currentProvider, getGlossary, setGlossary } from "../actions.js";
 import { CONCURRENCY } from "../queue.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
@@ -24,7 +27,10 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
       pause: TranslationCenter.#onPause,
       resume: TranslationCenter.#onResume,
       cancel: TranslationCenter.#onCancel,
-      restore: TranslationCenter.#onRestore
+      restore: TranslationCenter.#onRestore,
+      glossary: () => openGlossary(),
+      suggest: TranslationCenter.#onSuggest,
+      review: TranslationCenter.#onReview
     }
   };
 
@@ -80,6 +86,7 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
       filters,
       search: this.search,
       summary: await this.#summary(samples),
+      suggesting: this.suggesting,
       queue: { running: q.running, paused: q.paused, hasPending: q.pending.length > 0, done: q.done, total: q.total, percent: q.total ? Math.round((q.done / q.total) * 100) : 0, errors: q.errors.size, eta: eta === null ? null : formatDuration(eta) }
     };
   }
@@ -188,6 +195,58 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
     }
     this.selected.clear();
     this.queue.add(pages.map(p => p.uuid));
+  }
+
+  /** Seiten der Auswahl in Baumreihenfolge. */
+  #selectedPages() {
+    const { visible } = buildRows({ folders: game.folders.filter(f => f.type === "JournalEntry"), entries: game.journal.contents, statusOf: this.statusOf, selected: this.selected, expanded: this.expanded, collapsed: this.collapsed });
+    return visible.filter(u => this.selected.has(u)).map(u => fromUuidSync(u)).filter(Boolean);
+  }
+
+  static async #onSuggest() {
+    const pages = this.#selectedPages();
+    if (!pages.length || this.suggesting) return ui.notifications.warn(game.i18n.localize("VTTTRANSLATE.Center.SelectFirst"));
+    const ok = await DialogV2.confirm({
+      window: { title: "VTTTRANSLATE.Glossary.SuggestTitle" },
+      content: `<p>${game.i18n.format("VTTTRANSLATE.Glossary.SuggestConfirm", { count: pages.length })}</p>`
+    });
+    if (!ok) return;
+
+    this.suggesting = true;
+    this.render({ parts: ["footer"] });
+    const note = ui.notifications.info(game.i18n.localize("VTTTRANSLATE.Glossary.Suggesting"), { progress: true });
+    try {
+      const { provider } = currentProvider();
+      const texts = pages.map(p => `# ${p.parent.name} – ${p.name}\n${plainText(getOriginal(p))}`);
+      const { terms } = await suggestTerms({
+        texts,
+        provider,
+        known: getGlossary().map(g => g.source),
+        onProgress: (done, total) => note?.update?.({ pct: done / total })
+      });
+      const { glossary, added } = mergeSuggestions(getGlossary(), terms);
+      await setGlossary(glossary);
+      ui.notifications.info(game.i18n.format("VTTTRANSLATE.Glossary.Suggested", { count: added }));
+      openGlossary({ filter: "suggested" });
+    } catch (err) {
+      console.error(`${MODULE_ID} |`, err);
+      ui.notifications.error(game.i18n.format("VTTTRANSLATE.Glossary.SuggestError", { error: err.message }));
+    } finally {
+      note?.remove?.();
+      this.suggesting = false;
+      this.render({ parts: ["footer"] });
+    }
+  }
+
+  /** Prüf-Ansicht: ausgewählte übersetzte Seiten, sonst alle ungeprüften. */
+  static #onReview() {
+    let pages = this.#selectedPages().filter(p => pageStatus(p) !== "open");
+    if (!pages.length) {
+      const { visible } = buildRows({ folders: game.folders.filter(f => f.type === "JournalEntry"), entries: game.journal.contents, statusOf: this.statusOf, selected: this.selected, expanded: this.expanded, collapsed: this.collapsed });
+      pages = visible.map(u => fromUuidSync(u)).filter(p => p && ["translated", "partial", "edited"].includes(pageStatus(p)));
+    }
+    if (!pages.length) return ui.notifications.warn(game.i18n.localize("VTTTRANSLATE.Review.Empty"));
+    openReview(pages.map(p => p.uuid));
   }
 
   static #onPause() { this.queue.pause(); }

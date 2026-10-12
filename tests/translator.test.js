@@ -49,3 +49,14 @@ test("Dauerhaft fehlerhafter Block bleibt im Original", async () => {
   assert.equal(result.failed, 1);
   assert.equal(result.html, `<p>One <em>two</em></p><p>Drei</p>`);
 });
+
+test("Glossar und Hinweis gehen in die Anfrage, System-Prompt bleibt gleich", async () => {
+  const seen = [];
+  const provider = { async translate({ system, input }) { seen.push({ system, input: JSON.parse(input) }); return { text: JSON.stringify({ blocks: JSON.parse(input).blocks.map(b => ({ id: b.id, html: b.html })) }) }; } };
+  await translateHtml({ html: "<p>Raven Cane</p>", context, glossary: [{ source: "Raven Cane", target: "Rabenstock" }], hint: "förmlicher", provider });
+  await translateHtml({ html: "<p>Other</p>", context, provider });
+  assert.deepEqual(seen[0].input.glossary, [{ en: "Raven Cane", de: "Rabenstock" }]);
+  assert.equal(seen[0].input.hint, "förmlicher");
+  assert.equal(seen[1].input.glossary, undefined);
+  assert.equal(seen[0].system, seen[1].system);
+});

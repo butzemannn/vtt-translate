@@ -35,7 +35,8 @@
       "translated": "Übersetzt",
       "partial": "Teilweise",
       "edited": "Von Hand geändert",
-      "error": "Fehler"
+      "error": "Fehler",
+      "reviewed": "Geprüft"
     },
     "Center": {
       "Title": "Übersetzungs-Zentrale",
@@ -59,7 +60,51 @@
       "ConfirmRestore": "Bei {count} Seiten wird der englische Originaltext wiederhergestellt.",
       "Restored": "{count} Seiten wiederhergestellt.",
       "Duration": "Dauer ca. {time}",
-      "Remaining": "noch ca. {time}"
+      "Remaining": "noch ca. {time}",
+      "SelectFirst": "Bitte zuerst Seiten auswählen."
+    },
+    "Glossary": {
+      "Title": "Glossar",
+      "Kind": {
+        "name": "Name",
+        "item": "Gegenstand",
+        "rules": "Regeln"
+      },
+      "KindLabel": "Art",
+      "Filter": {
+        "all": "Alle",
+        "suggested": "Vorschläge",
+        "confirmed": "Bestätigt"
+      },
+      "Add": "Neu",
+      "AcceptAll": "Alle {count} übernehmen",
+      "RejectAll": "Alle Vorschläge verwerfen",
+      "Accept": "Übernehmen",
+      "Remove": "Löschen",
+      "Hint": "Bestätigte Einträge werden beim Übersetzen strikt verwendet. Leeres Deutsch = bleibt unverändert. Vorschläge (hervorgehoben) gelten erst nach dem Übernehmen.",
+      "Source": "Englisch",
+      "Target": "Deutsch",
+      "Empty": "Keine Einträge.",
+      "Suggest": "Namen vorschlagen",
+      "SuggestTooltip": "Das LLM sucht Namen und Begriffe in den ausgewählten Seiten und schlägt deutsche Fassungen vor.",
+      "SuggestTitle": "Namen vorschlagen?",
+      "SuggestConfirm": "Das LLM liest {count} Seiten und schlägt Glossar-Einträge vor. Das kostet etwa ein Drittel einer Übersetzung dieser Seiten.",
+      "Suggesting": "Suche Namen und Begriffe …",
+      "Suggested": "{count} neue Vorschläge im Glossar.",
+      "SuggestError": "Vorschläge fehlgeschlagen: {error}"
+    },
+    "Review": {
+      "Title": "Übersetzung prüfen",
+      "Open": "Prüfen",
+      "Empty": "Keine übersetzten Seiten zum Prüfen.",
+      "Original": "Original",
+      "Translation": "Übersetzung",
+      "NotTranslated": "Noch nicht übersetzt.",
+      "HintPlaceholder": "Hinweis für neue Übersetzung, z. B. „förmlicher“ oder „Ireena duzt hier“",
+      "Retranslate": "Neu übersetzen",
+      "Restore": "Original",
+      "Edit": "Bearbeiten",
+      "Approve": "Geprüft"
     }
   }
 }

@@ -130,3 +130,20 @@ export function joinBlocks(root) {
 export function normalizeHtml(html) {
   return parseBody(html).innerHTML;
 }
+
+/** Reiner Text einer Seite (für Glossar-Suche und -Vorschläge); Link-Ziele raus, Labels bleiben. */
+export function plainText(html) {
+  const text = parseBody(html.replace(/<\/(p|h\d|li|td|th|div|blockquote)>/gi, "$&\n")).textContent;
+  return text.replace(REF_PATTERN, (m, target, label) => label ?? "").replace(/[ \t]+/g, " ").replace(/\n\s*\n+/g, "\n").trim();
+}
+
+/**
+ * Paart Blöcke von Original und Übersetzung (gleiche Struktur) für den Vergleich.
+ * @returns {{type: string, original: string, translated: string}[] | null}  null, wenn die Struktur abweicht
+ */
+export function pairBlocks(originalHtml, translatedHtml) {
+  const a = splitBlocks(originalHtml).blocks;
+  const b = splitBlocks(translatedHtml).blocks;
+  if (a.length !== b.length || a.some((block, i) => block.el.tagName !== b[i].el.tagName)) return null;
+  return a.map((block, i) => ({ type: block.type, original: block.el.innerHTML, translated: b[i].el.innerHTML }));
+}

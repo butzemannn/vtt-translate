@@ -12,6 +12,10 @@ Style:
 - Rules terms: use the official German D&D 5e terminology, e.g. "DC 15 Intelligence (Investigation) check" → "SG-15-Intelligenzwurf (Nachforschungen)", "passive Perception" → "passive Weisheit (Wahrnehmung)", "saving throw" → "Rettungswurf", "gp" → "GM", spell and item names with their official German names.
 - Proper names of persons and places stay unchanged unless the glossary says otherwise.
 
+Input:
+- "glossary" (if present) is mandatory: render each English term exactly with the given German term; "de" equal to "en" means keep it unchanged. Inflect German terms grammatically where needed.
+- "hint" (if present) is an extra instruction from the game master for this page; follow it.
+
 Format:
 - Each block is an HTML fragment. Translate only the text.
 - Keep every element with its k attribute exactly once and with the same tag. You may reorder elements and move text in or out of them where German grammar requires it. Do not add elements or attributes.
@@ -36,15 +40,12 @@ const RESPONSE_SCHEMA = {
   additionalProperties: false
 };
 
-function buildSystem(glossary) {
-  if (!glossary?.length) return SYSTEM_PROMPT;
-  const lines = glossary.map(g => `- ${g.source} → ${g.target || g.source}`);
-  return `${SYSTEM_PROMPT}\n\nGlossary (mandatory):\n${lines.join("\n")}`;
-}
-
-function buildInput(context, blocks, notes = {}) {
+// Glossar und Hinweis stehen in der Anfrage, nicht im System-Prompt: der bleibt gleich und kann gecacht werden.
+function buildInput(context, blocks, { notes = {}, glossary, hint } = {}) {
   return JSON.stringify({
     context,
+    ...(glossary?.length && { glossary: glossary.map(g => ({ en: g.source, de: g.target || g.source })) }),
+    ...(hint && { hint }),
     blocks: blocks.map(b => ({ id: b.id, type: b.type, html: b.html, ...(notes[b.id] && { fix: notes[b.id] }) }))
   });
 }
@@ -61,8 +62,8 @@ export function parseJson(text) {
   }
 }
 
-async function requestBlocks(provider, system, context, blocks, notes, usage) {
-  const res = await provider.translate({ system, input: buildInput(context, blocks, notes), schema: RESPONSE_SCHEMA });
+async function requestBlocks(provider, context, blocks, extra, usage) {
+  const res = await provider.translate({ system: SYSTEM_PROMPT, input: buildInput(context, blocks, extra), schema: RESPONSE_SCHEMA });
   usage.input += res.usage?.input ?? 0;
   usage.output += res.usage?.output ?? 0;
   const result = new Map();
@@ -74,12 +75,12 @@ async function requestBlocks(provider, system, context, blocks, notes, usage) {
  * Zeichenzahlen einer Seite für die Kostenschätzung (ohne Anfrage).
  * @returns {{inputChars: number, outputChars: number, words: number}}
  */
-export function measureHtml(html, context = {}) {
+export function measureHtml(html, context = {}, glossary) {
   const { blocks } = splitBlocks(html);
   if (!blocks.length) return { inputChars: 0, outputChars: 0, words: 0 };
   const outputChars = blocks.reduce((sum, b) => sum + b.html.length, 0);
   const words = blocks.reduce((sum, b) => sum + b.el.textContent.split(/\s+/).filter(Boolean).length, 0);
-  return { inputChars: SYSTEM_PROMPT.length + buildInput(context, blocks).length, outputChars, words };
+  return { inputChars: SYSTEM_PROMPT.length + buildInput(context, blocks, { glossary }).length, outputChars, words };
 }
 
 /**
@@ -87,22 +88,22 @@ export function measureHtml(html, context = {}) {
  * @param {object} args
  * @param {string} args.html            Original-HTML
  * @param {object} args.context         z. B. {journal, folder, page}
- * @param {{source:string,target:string}[]} [args.glossary]
+ * @param {{source:string,target:string}[]} [args.glossary]  nur die für diese Seite relevanten Einträge
+ * @param {string} [args.hint]  zusätzliche Anweisung des GM
  * @param {{translate: Function}} args.provider
  * @returns {Promise<{html: string, failed: number, total: number, usage: {input: number, output: number}}>}
  */
-export async function translateHtml({ html, context, glossary, provider }) {
+export async function translateHtml({ html, context, glossary, hint, provider }) {
   const { root, blocks } = splitBlocks(html);
   const usage = { input: 0, output: 0 };
   if (!blocks.length) return { html, failed: 0, total: 0, usage };
 
-  const system = buildSystem(glossary);
   let pending = blocks;
   let notes = {};
 
   // Erster Versuch für alle Blöcke, zweiter nur für fehlerhafte (mit Fehlerhinweis).
   for (let attempt = 0; attempt < 2 && pending.length; attempt++) {
-    const result = await requestBlocks(provider, system, context, pending, notes, usage);
+    const result = await requestBlocks(provider, context, pending, { notes, glossary, hint }, usage);
     const retry = [];
     notes = {};
     for (const block of pending) {
