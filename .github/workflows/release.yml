@@ -35,6 +35,7 @@ jobs:
         run: zip -r module.zip module.json scripts lang vendor README.md Changelog.md
 
       - name: Release anlegen
-        run: gh release create "$GITHUB_REF_NAME" module.json module.zip --title "$GITHUB_REF_NAME" --notes "Änderungen: siehe Changelog.md"
+        run: |
+          gh release create "$GITHUB_REF_NAME" module.json module.zip --title "$GITHUB_REF_NAME" --notes "Änderungen siehe Changelog.md"
         env:
           GH_TOKEN: ${{ github.token }}
