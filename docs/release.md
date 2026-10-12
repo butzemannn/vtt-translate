@@ -29,7 +29,7 @@ https://github.com/<owner>/<repo>/releases/latest/download/module.json
 
 ## Inhalt des Zips
 
-`module.json`, `scripts/`, `lang/`, `vendor/`, `README.md`, `Changelog.md`.
+`module.json`, `scripts/`, `lang/`, `vendor/`, `templates/`, `styles/`, `README.md`, `Changelog.md`. Neue Ordner, die das Modul zur Laufzeit lädt, hier und im Workflow ergänzen.
 
 ## Hinweis
 

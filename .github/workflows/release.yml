@@ -32,7 +32,7 @@ jobs:
             module.json > module.tmp && mv module.tmp module.json
 
       - name: Zip bauen
-        run: zip -r module.zip module.json scripts lang vendor README.md Changelog.md
+        run: zip -r module.zip module.json scripts lang vendor templates styles README.md Changelog.md
 
       - name: Release anlegen
         run: |
