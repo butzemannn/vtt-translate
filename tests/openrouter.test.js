@@ -46,3 +46,16 @@ test("Andere Fehler werden durchgereicht", async () => {
 test("JSON auch aus Codeblock lesbar", () => {
   assert.deepEqual(parseJson('Hier:\n```json\n{"blocks":[{"id":0,"html":"x"}]}\n```'), { blocks: [{ id: 0, html: "x" }] });
 });
+
+test("Denkaufwand wird als reasoning gesendet, Zeitlimit gesetzt", async () => {
+  let init;
+  globalThis.fetch = async (url, i) => { init = i; return { ok: true, status: 200, json: async () => ({ choices: [{ finish_reason: "stop", message: { content: "{}" } }] }) }; };
+  await createOpenRouterProvider({ apiKey: "k", model: "m" }).translate({ ...args, effort: "low" });
+  assert.deepEqual(JSON.parse(init.body).reasoning, { effort: "low" });
+  assert.ok(init.signal, "AbortSignal gesetzt");
+});
+
+test("Zeitüberschreitung gibt verständlichen Fehler", async () => {
+  globalThis.fetch = async () => { const e = new Error("timeout"); e.name = "TimeoutError"; throw e; };
+  await assert.rejects(createOpenRouterProvider({ apiKey: "k", model: "m" }).translate(args), /Keine Antwort von OpenRouter nach 5 Min/);
+});

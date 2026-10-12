@@ -212,7 +212,7 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
     });
     if (!ok) return;
 
-    this.suggesting = true;
+    this.suggesting = "…";
     this.render({ parts: ["footer"] });
     const note = ui.notifications.info(game.i18n.localize("VTTTRANSLATE.Glossary.Suggesting"), { progress: true });
     try {
@@ -222,7 +222,11 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
         texts,
         provider,
         known: getGlossary().map(g => g.source),
-        onProgress: (done, total) => note?.update?.({ pct: done / total })
+        onProgress: (done, total) => {
+          this.suggesting = `${done}/${total}`;
+          this.render({ parts: ["footer"] });
+          note?.update?.({ pct: total ? done / total : 0, message: game.i18n.format("VTTTRANSLATE.Glossary.SuggestingProgress", { done, total }) });
+        }
       });
       const { glossary, added } = mergeSuggestions(getGlossary(), terms);
       await setGlossary(glossary);

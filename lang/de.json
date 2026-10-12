@@ -91,7 +91,8 @@
       "SuggestConfirm": "Das LLM liest {count} Seiten und schlägt Glossar-Einträge vor. Das kostet etwa ein Drittel einer Übersetzung dieser Seiten.",
       "Suggesting": "Suche Namen und Begriffe …",
       "Suggested": "{count} neue Vorschläge im Glossar.",
-      "SuggestError": "Vorschläge fehlgeschlagen: {error}"
+      "SuggestError": "Vorschläge fehlgeschlagen: {error}",
+      "SuggestingProgress": "Suche Namen und Begriffe … {done}/{total} Pakete"
     },
     "Review": {
       "Title": "Übersetzung prüfen",

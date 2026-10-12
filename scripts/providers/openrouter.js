@@ -1,17 +1,25 @@
 // Provider für OpenRouter (OpenAI-kompatible API, viele Modelle). Aufruf direkt aus dem Browser.
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
+const TIMEOUT_MS = 5 * 60 * 1000;
 
 export function createOpenRouterProvider({ apiKey, model }) {
   async function request(body) {
-    const res = await fetch(ENDPOINT, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-        "X-Title": "VTT Translate"
-      },
-      body: JSON.stringify(body)
-    });
+    let res;
+    try {
+      res = await fetch(ENDPOINT, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+          "X-Title": "VTT Translate"
+        },
+        body: JSON.stringify(body),
+        signal: AbortSignal.timeout(TIMEOUT_MS)
+      });
+    } catch (err) {
+      if (err.name === "TimeoutError") throw new Error(`Keine Antwort von OpenRouter nach ${TIMEOUT_MS / 60000} Min.`);
+      throw err;
+    }
     const data = await res.json().catch(() => ({}));
     if (!res.ok || data.error) {
       const err = new Error(`OpenRouter ${res.status}: ${data.error?.message ?? res.statusText}`);
@@ -23,10 +31,11 @@ export function createOpenRouterProvider({ apiKey, model }) {
 
   return {
     /** @returns {Promise<{text: string, usage: {input: number, output: number}}>} */
-    async translate({ system, input, schema }) {
+    async translate({ system, input, schema, effort }) {
       const body = {
         model,
         max_tokens: 16000,
+        ...(effort && { reasoning: { effort } }),
         messages: [
           { role: "system", content: system },
           { role: "user", content: input }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1 – 2026-10-12
+
+- Namen vorschlagen: kleinere Pakete (12k Zeichen), 3 parallel, wenig Denkaufwand – deutlich schneller bei vielen Seiten
+- Fortschritt beim Vorschlagen im Knopf und in der Meldung („2/7“), Log-Zeilen in der Konsole
+- Zeitlimit 5 Min. pro Anfrage (OpenRouter und Claude) – Fehler statt endlosem Warten
+- Provider: optionaler Denkaufwand (`effort`; OpenRouter `reasoning`, Claude `output_config.effort`)
+
 ## 0.4.0 – 2026-10-12
 
 - **Glossar** (Zentrale → Glossar): Namen und Begriffe EN → DE, leeres Deutsch = bleibt; wird beim Übersetzen strikt verwendet (nur Einträge, die auf der Seite vorkommen)

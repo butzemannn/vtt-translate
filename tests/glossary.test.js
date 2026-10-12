@@ -47,5 +47,25 @@ test("suggestTerms fragt pro Paket und sammelt Begriffe", async () => {
   assert.equal(inputs.length, 2);
   assert.deepEqual(inputs[0].known, ["Strahd"]);
   assert.deepEqual(result.terms.map(t => t.source), ["T1", "T2"]);
-  assert.deepEqual(progress, ["1/2", "2/2"]);
+  assert.deepEqual(progress, ["0/2", "1/2", "2/2"]);
+});
+
+test("suggestTerms: höchstens 3 Pakete gleichzeitig, wenig Denkaufwand, Ergebnis in Reihenfolge", async () => {
+  let active = 0, maxActive = 0;
+  const efforts = [];
+  const provider = {
+    async translate({ input, effort }) {
+      efforts.push(effort);
+      active++; maxActive = Math.max(maxActive, active);
+      await new Promise(r => setTimeout(r, 5));
+      active--;
+      const n = JSON.parse(input).text[0];
+      return { text: JSON.stringify({ terms: [{ source: n, target: "", kind: "name" }] }) };
+    }
+  };
+  const texts = ["a", "b", "c", "d", "e"].map(c => c.repeat(10000));
+  const { terms } = await suggestTerms({ texts, provider });
+  assert.equal(maxActive, 3);
+  assert.deepEqual(terms.map(t => t.source), ["a", "b", "c", "d", "e"]);
+  assert.ok(efforts.every(e => e === "low"));
 });

@@ -32,8 +32,9 @@ const SUGGEST_SCHEMA = {
   additionalProperties: false
 };
 
-// Zeichen pro Anfrage für Vorschläge (ca. 10k Tokens).
-const CHUNK_CHARS = 40000;
+// Zeichen pro Anfrage für Vorschläge (ca. 3k Tokens) und parallele Anfragen.
+const CHUNK_CHARS = 12000;
+const CONCURRENCY = 3;
 
 const key = term => term.trim().toLowerCase();
 
@@ -72,22 +73,33 @@ export function chunkTexts(texts, maxChars = CHUNK_CHARS) {
 }
 
 /**
- * Fragt Glossar-Vorschläge für Texte ab.
+ * Fragt Glossar-Vorschläge für Texte ab (Pakete parallel).
  * @param {{texts: string[], provider: object, known?: string[], onProgress?: (done: number, total: number) => void}} args
  * @returns {Promise<{terms: object[], usage: {input: number, output: number}}>}
  */
 export async function suggestTerms({ texts, provider, known = [], onProgress = () => {} }) {
   const chunks = chunkTexts(texts.filter(Boolean));
-  const terms = [];
+  const results = new Array(chunks.length);
   const usage = { input: 0, output: 0 };
-  for (let i = 0; i < chunks.length; i++) {
-    // Bereits bekannte Begriffe mitschicken, damit sie nicht erneut vorgeschlagen werden.
-    const input = JSON.stringify({ known: known.slice(0, 500), text: chunks[i] });
-    const res = await provider.translate({ system: SUGGEST_PROMPT, input, schema: SUGGEST_SCHEMA });
-    usage.input += res.usage?.input ?? 0;
-    usage.output += res.usage?.output ?? 0;
-    terms.push(...(parseJson(res.text).terms ?? []));
-    onProgress(i + 1, chunks.length);
+  let next = 0;
+  let done = 0;
+  onProgress(0, chunks.length);
+
+  async function work() {
+    while (next < chunks.length) {
+      const i = next++;
+      // Bereits bekannte Begriffe mitschicken, damit sie nicht erneut vorgeschlagen werden.
+      const input = JSON.stringify({ known: known.slice(0, 500), text: chunks[i] });
+      console.info(`vtt-translate | Namen: Paket ${i + 1}/${chunks.length} (${chunks[i].length} Zeichen) gestartet`);
+      const res = await provider.translate({ system: SUGGEST_PROMPT, input, schema: SUGGEST_SCHEMA, effort: "low" });
+      usage.input += res.usage?.input ?? 0;
+      usage.output += res.usage?.output ?? 0;
+      results[i] = parseJson(res.text).terms ?? [];
+      console.info(`vtt-translate | Namen: Paket ${i + 1}/${chunks.length} fertig, ${results[i].length} Begriffe`);
+      onProgress(++done, chunks.length);
+    }
   }
-  return { terms, usage };
+
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, chunks.length) }, work));
+  return { terms: results.flat(), usage };
 }

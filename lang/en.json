@@ -91,7 +91,8 @@
       "SuggestConfirm": "The LLM reads {count} pages and suggests glossary entries. This costs about a third of translating these pages.",
       "Suggesting": "Looking for names and terms …",
       "Suggested": "{count} new suggestions in the glossary.",
-      "SuggestError": "Suggestions failed: {error}"
+      "SuggestError": "Suggestions failed: {error}",
+      "SuggestingProgress": "Looking for names and terms … {done}/{total} chunks"
     },
     "Review": {
       "Title": "Review translation",

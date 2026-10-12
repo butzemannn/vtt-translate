@@ -19,7 +19,7 @@
   <div class="vtt-buttons">
     <div class="vtt-button-group">
       <button type="button" data-action="glossary"><i class="fa-solid fa-book-atlas"></i> {{localize "VTTTRANSLATE.Glossary.Title"}}</button>
-      <button type="button" data-action="suggest" {{#if suggesting}}disabled{{/if}} data-tooltip="{{localize 'VTTTRANSLATE.Glossary.SuggestTooltip'}}"><i class="fa-solid {{#if suggesting}}fa-spinner fa-spin{{else}}fa-wand-magic-sparkles{{/if}}"></i> {{localize "VTTTRANSLATE.Glossary.Suggest"}}</button>
+      <button type="button" data-action="suggest" {{#if suggesting}}disabled{{/if}} data-tooltip="{{localize 'VTTTRANSLATE.Glossary.SuggestTooltip'}}"><i class="fa-solid {{#if suggesting}}fa-spinner fa-spin{{else}}fa-wand-magic-sparkles{{/if}}"></i> {{localize "VTTTRANSLATE.Glossary.Suggest"}}{{#if suggesting}} {{suggesting}}{{/if}}</button>
       <button type="button" data-action="review"><i class="fa-solid fa-magnifying-glass"></i> {{localize "VTTTRANSLATE.Review.Open"}}</button>
     </div>
     <div class="vtt-button-group">

@@ -2,17 +2,18 @@
 import Anthropic from "../../vendor/anthropic-sdk.mjs";
 
 export function createClaudeProvider({ apiKey, model }) {
-  const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+  // Zeitlimit 5 Min., ein Wiederholungsversuch (SDK wiederholt sonst bis zu 2×).
+  const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true, timeout: 5 * 60 * 1000, maxRetries: 1 });
 
   return {
     /** @returns {Promise<{text: string, usage: {input: number, output: number}}>} */
-    async translate({ system, input, schema }) {
+    async translate({ system, input, schema, effort = "medium" }) {
       const response = await client.beta.messages.create({
         model,
         max_tokens: 16000,
         system,
         messages: [{ role: "user", content: input }],
-        output_config: { effort: "medium", format: { type: "json_schema", schema } },
+        output_config: { effort, format: { type: "json_schema", schema } },
         // Bei Ablehnung durch Sicherheitsfilter (z. B. Horror-Szenen) automatisch passendes Ersatzmodell.
         betas: ["server-side-fallback-2026-07-01"],
         fallbacks: "default"
