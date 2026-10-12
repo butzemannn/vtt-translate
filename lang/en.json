@@ -2,8 +2,8 @@
   "VTTTRANSLATE": {
     "Settings": {
       "Provider": { "Name": "LLM provider" },
-      "Model": { "Name": "Model", "Hint": "Provider model ID, e.g. claude-opus-5-5 or claude-sonnet-5-5." },
-      "ApiKey": { "Name": "API key", "Hint": "Stored in this browser only." }
+      "Model": { "Name": "Model", "Hint": "Provider model ID. Claude: e.g. claude-opus-5-5. OpenRouter: ID from openrouter.ai/models in the format provider/model." },
+      "ApiKey": { "Name": "API key", "Hint": "Key of the selected provider. Stored in this browser only." }
     },
     "Controls": {
       "Translate": "Translate page",

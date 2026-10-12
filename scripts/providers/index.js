@@ -1,8 +1,10 @@
 // Wählt den Provider anhand der Einstellungen.
 import { createClaudeProvider } from "./claude.js";
+import { createOpenRouterProvider } from "./openrouter.js";
 
 const FACTORIES = {
-  claude: createClaudeProvider
+  claude: createClaudeProvider,
+  openrouter: createOpenRouterProvider
 };
 
 export function createProvider(name, options) {

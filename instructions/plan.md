@@ -19,7 +19,7 @@ Foundry-VTT-Modul, das englische Inhalte aus *Legends of Barovia* (Pyram King, C
 |---|---|
 | Foundry | Nur v14 (aktuell 14.368) |
 | System | dnd5e (aktuelle Version zu v14) |
-| LLM | Mehrere Anbieter wählbar (Claude, OpenAI, Ollama). Primär: Claude. Direkter API-Aufruf, kein Copy-Paste. |
+| LLM | Mehrere Anbieter wählbar (Claude, OpenRouter, später OpenAI, Ollama). Nutzer verwendet OpenRouter. Direkter API-Aufruf, kein Copy-Paste. |
 | Original | Wird ersetzt (in place). Original als Flag gesichert, wiederherstellbar. Map-Pins bleiben dadurch gültig. |
 | Ort | Übersetzt wird in der Welt (Journal-Seitenleiste), nicht im Kompendium |
 | Umfang | Seite, Journal, Ordner, alles – zentral über die Übersetzungs-Zentrale |
@@ -117,7 +117,7 @@ Alles läuft im Browser des GM. Kein eigener Server, kein Build-Schritt (Entsche
 3. **Qualität + Prüfen** – Stil-Prompt verfeinern, Glossar mit Vorschlägen, Prüf-Ansicht, „neu übersetzen mit Hinweis“.
 4. **Am Spieltisch** – „Szene vorbereiten“, optional Übersetzen beim Öffnen.
 5. **Weitere Inhalte** – Journal-/Seitennamen, Map-Notizen, Szenennamen.
-6. **Weitere Anbieter** – OpenAI, Ollama.
+6. **Weitere Anbieter** – OpenAI, Ollama. (OpenRouter vorgezogen in 0.2.0, da Nutzer es verwendet.)
 7. *(später)* Vorlesen (TTS) mit Erzähler-/NSC-Stimmen.
 8. *(später)* Actors/Items.
 

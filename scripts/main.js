@@ -11,7 +11,7 @@ Hooks.once("init", () => {
     scope: "world",
     config: true,
     type: String,
-    choices: { claude: "Claude (Anthropic)" },
+    choices: { claude: "Claude (Anthropic)", openrouter: "OpenRouter" },
     default: "claude"
   });
   game.settings.register(MODULE_ID, "model", {

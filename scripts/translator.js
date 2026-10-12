@@ -16,7 +16,8 @@ Format:
 - Each block is an HTML fragment. Translate only the text.
 - Keep every element with its k attribute exactly once and with the same tag. You may reorder elements and move text in or out of them where German grammar requires it. Do not add elements or attributes.
 - <x-ref> elements are links: translate their text if they have any, keep empty ones empty.
-- Blocks belong together (e.g. lines of a poem): use the context, but return exactly one translation per block id.`;
+- Blocks belong together (e.g. lines of a poem): use the context, but return exactly one translation per block id.
+- Answer only with JSON: {"blocks": [{"id": <number>, "html": "<translated fragment>"}]}`;
 
 const RESPONSE_SCHEMA = {
   type: "object",
@@ -48,10 +49,22 @@ function buildInput(context, blocks, notes = {}) {
   });
 }
 
+/** JSON aus der Antwort lesen; toleriert Codeblöcke oder Text drumherum (Modelle ohne Structured Output). */
+export function parseJson(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    const start = text.indexOf("{");
+    const end = text.lastIndexOf("}");
+    if (start < 0 || end < start) throw new Error("Antwort enthält kein JSON.");
+    return JSON.parse(text.slice(start, end + 1));
+  }
+}
+
 async function requestBlocks(provider, system, context, blocks, notes) {
   const text = await provider.translate({ system, input: buildInput(context, blocks, notes), schema: RESPONSE_SCHEMA });
   const result = new Map();
-  for (const b of JSON.parse(text).blocks ?? []) result.set(b.id, b.html);
+  for (const b of parseJson(text).blocks ?? []) result.set(b.id, b.html);
   return result;
 }
 

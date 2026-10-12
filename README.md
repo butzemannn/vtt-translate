@@ -4,7 +4,7 @@ Foundry-VTT-Modul (v14), das Journal-Seiten per LLM ins Deutsche übersetzt – 
 
 ## Stand
 
-Version 0.1.0 – einzelne Seite übersetzen und wiederherstellen (Claude). Plan: `instructions/plan.md`.
+Version 0.2.0 – einzelne Seite übersetzen und wiederherstellen. Anbieter: Claude (Anthropic) oder OpenRouter. Plan: `instructions/plan.md`.
 
 ## Installation
 
@@ -14,7 +14,7 @@ Foundry → Add-on-Module → Modul installieren → Manifest-URL:
 https://github.com/<owner>/<repo>/releases/latest/download/module.json
 ```
 
-Danach in der Welt aktivieren → Einstellungen → VTT Translate → API-Key eintragen.
+Danach in der Welt aktivieren → Einstellungen → VTT Translate → Anbieter, Modell und API-Key eintragen.
 
 Für Entwicklung alternativ per Symlink: `ln -s /pfad/zu/vtt-translate <Foundry-Data>/modules/vtt-translate`. Releases: `docs/release.md`.
 
@@ -28,7 +28,7 @@ Journal öffnen → Menü oben rechts im Fenster → **Seite übersetzen** bzw. 
 npm install
 npm test                                  # Tests gegen samples/
 npm run vendor                            # Anthropic-SDK neu bündeln (vendor/)
-ANTHROPIC_API_KEY=... node tools/try-page.js "Foyer" claude-sonnet-5-5   # Probeübersetzung → out/
+API_KEY=... node tools/try-page.js "Foyer" <modell> [claude|openrouter]   # Probeübersetzung → out/
 ```
 
 Doku: `docs/`, Architekturentscheidungen: `docs/adr/`, Änderungen: `Changelog.md`.

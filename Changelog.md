@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0 – 2026-10-12
+
+- Neuer Anbieter OpenRouter (`scripts/providers/openrouter.js`): Modell frei wählbar, Structured Output mit Fallback für Modelle ohne Unterstützung
+- JSON-Antworten werden tolerant gelesen (Codeblöcke/Text drumherum)
+- `tools/try-page.js`: Anbieter als drittes Argument, Key über `API_KEY`
+
 ## 0.1.0 – 2026-10-12
 
 - Modul-Gerüst für Foundry v14 (`module.json`, Sprachdateien de/en)

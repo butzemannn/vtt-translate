@@ -8,7 +8,7 @@
 | `scripts/translator.js` | Prompt, Anfrage, Prüfung, Wiederholung |
 | `scripts/html.js` | HTML in Blöcke zerlegen / zusammensetzen ([ADR 0003](adr/0003-blockweise-uebersetzung.md)) |
 | `scripts/store.js` | Übersetzung speichern, Original sichern/wiederherstellen ([ADR 0002](adr/0002-original-als-flag.md)) |
-| `scripts/providers/` | Ein Adapter pro LLM: `translate({system, input, schema}) → JSON-Text` |
+| `scripts/providers/` | Ein Adapter pro LLM: `translate({system, input, schema}) → JSON-Text`. Vorhanden: `claude` (Anthropic-SDK), `openrouter` (fetch, OpenAI-kompatibel) |
 | `vendor/` | Gebündeltes Anthropic-SDK ([ADR 0001](adr/0001-kein-build-schritt.md)) |
 
 ## Ablauf „Seite übersetzen“
