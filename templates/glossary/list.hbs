@@ -4,7 +4,7 @@
     <thead><tr><th>{{localize "VTTTRANSLATE.Glossary.Source"}}</th><th>{{localize "VTTTRANSLATE.Glossary.Target"}}</th><th>{{localize "VTTTRANSLATE.Glossary.KindLabel"}}</th><th></th></tr></thead>
     <tbody>
       {{#each entries}}
-      <tr data-index="{{index}}" class="{{#if suggested}}suggested{{/if}}">
+      <tr data-index="{{index}}" class="{{#if suggested}}suggested{{/if}} {{#if (eq origin 'compendium')}}compendium{{/if}}">
         <td><input type="text" data-field="source" value="{{source}}"></td>
         <td><input type="text" data-field="target" value="{{target}}" placeholder="{{source}}"></td>
         <td><select data-field="kind">{{#each kinds}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}</select></td>
@@ -18,4 +18,5 @@
       {{/each}}
     </tbody>
   </table>
+  {{#if hidden}}<p class="vtt-hint">{{localize "VTTTRANSLATE.Glossary.Hidden" count=hidden}}</p>{{/if}}
 </div>

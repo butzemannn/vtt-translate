@@ -35,7 +35,7 @@ const renderFile = (file, ctx) => Handlebars.compile(readFileSync(new URL(`../te
 test("Glossar-Templates rendern Vorschläge und Felder", () => {
   const kinds = [{ value: "name", label: "Name", selected: true }];
   const list = renderFile("glossary/list", { entries: [{ index: 3, source: "Raven Cane", target: "", kind: "name", suggested: true, kinds }] });
-  assert.match(list, /data-index="3" class="suggested"/);
+  assert.match(list, /data-index="3" class="suggested /);
   assert.match(list, /data-action="accept"/);
   assert.match(list, /placeholder="Raven Cane"/);
   assert.match(renderFile("glossary/controls", { filters: [], suggested: 2 }), /acceptAll/);

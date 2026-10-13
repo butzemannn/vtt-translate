@@ -60,3 +60,22 @@ test("Glossar und Hinweis gehen in die Anfrage, System-Prompt bleibt gleich", as
   assert.equal(seen[1].input.glossary, undefined);
   assert.equal(seen[0].system, seen[1].system);
 });
+
+test("Würfelangaben werden erkannt und müssen erhalten bleiben", async () => {
+  const { diceIn } = await import("../scripts/translator.js");
+  assert.deepEqual(diceIn("deals 1d8 piercing and <b>2d6 + 3</b>, roll d20"), ["1d8", "2d6+3", "d20"]);
+
+  const html = `<p>The rapier deals 1d8 piercing damage.</p>`;
+  const provider = fakeProvider((b, call) => (call === 1 ? "Das Rapier verursacht 1W8 Stichschaden." : "Das Rapier verursacht 1d8 Stichschaden."));
+  const result = await translateHtml({ html, context, provider });
+  assert.equal(provider.calls.length, 2);
+  assert.match(provider.calls[1][0].fix, /Würfelangaben/);
+  assert.equal(result.html, `<p>Das Rapier verursacht 1d8 Stichschaden.</p>`);
+});
+
+test("Würfel in Enrichern zählen nicht als Text", async () => {
+  const { splitBlocks } = await import("../scripts/html.js");
+  const { diceIn } = await import("../scripts/translator.js");
+  const [block] = splitBlocks(`<p>Pouch with [[/r 1d10+10]] gp</p>`).blocks;
+  assert.deepEqual(diceIn(block.html), []);
+});

@@ -38,10 +38,23 @@ const CONCURRENCY = 3;
 
 const key = term => term.trim().toLowerCase();
 
+// Ganzes Wort, ohne Groß/Klein, englischer Plural erlaubt ("Skeleton" findet "skeletons", "Light" nicht "lightning").
+const patterns = new Map();
+function termPattern(source) {
+  let re = patterns.get(source);
+  if (!re) {
+    const escaped = source.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    re = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?:s|es)?(?![\\p{L}\\p{N}])`, "iu");
+    patterns.set(source, re);
+  }
+  return re;
+}
+
 /** Bestätigte Einträge, die im Text vorkommen (nur diese gehen in den Prompt). */
 export function relevantTerms(glossary, text) {
-  const haystack = text.toLowerCase();
-  return glossary.filter(g => !g.suggested && g.source && haystack.includes(key(g.source)));
+  const lower = text.toLowerCase();
+  // Schneller Vorfilter per Teilstring, genaue Wortprüfung nur für Kandidaten.
+  return glossary.filter(g => !g.suggested && g.source?.trim() && lower.includes(key(g.source)) && termPattern(g.source).test(text));
 }
 
 /** Neue Vorschläge anhängen; vorhandene Einträge (auch bestätigte) bleiben unverändert. */
@@ -55,6 +68,33 @@ export function mergeSuggestions(glossary, terms) {
     added.push({ source, target: t.target?.trim() === source ? "" : (t.target?.trim() ?? ""), kind: t.kind ?? "name", suggested: true });
   }
   return { glossary: [...glossary, ...added], added: added.length };
+}
+
+/**
+ * Begriffspaare aus Kompendien, die Babele übersetzt hat (z. B. deutsche dnd5e-Module).
+ * Babele hinterlegt den englischen Namen als originalName bzw. flags.babele.originalName.
+ * @param {{documentName: string, getIndex: Function}[]} packs
+ */
+export async function compendiumTerms(packs) {
+  const terms = new Map();
+  for (const pack of packs) {
+    if (!["Item", "Actor"].includes(pack.documentName)) continue;
+    const index = await pack.getIndex({ fields: ["flags.babele.originalName"] });
+    for (const e of index) {
+      const original = e.originalName ?? e.flags?.babele?.originalName;
+      if (!original || !e.name || original === e.name || terms.has(key(original))) continue;
+      terms.set(key(original), { source: original, target: e.name, kind: "rules", origin: "compendium" });
+    }
+  }
+  return [...terms.values()];
+}
+
+/** Kompendium-Einträge ersetzen; eigene Einträge haben Vorrang und bleiben unverändert. */
+export function mergeCompendiumTerms(glossary, terms) {
+  const own = glossary.filter(g => g.origin !== "compendium");
+  const known = new Set(own.map(g => key(g.source)));
+  const imported = terms.filter(t => !known.has(key(t.source)));
+  return { glossary: [...own, ...imported], imported: imported.length };
 }
 
 /** Texte in Pakete bis maxChars aufteilen (ein sehr langer Text bildet ein eigenes Paket). */

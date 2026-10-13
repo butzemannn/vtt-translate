@@ -72,9 +72,10 @@
       },
       "KindLabel": "Art",
       "Filter": {
-        "all": "Alle",
+        "own": "Eigene",
         "suggested": "Vorschläge",
-        "confirmed": "Bestätigt"
+        "compendium": "Aus Kompendien",
+        "all": "Alle"
       },
       "Add": "Neu",
       "AcceptAll": "Alle {count} übernehmen",
@@ -92,7 +93,12 @@
       "Suggesting": "Suche Namen und Begriffe …",
       "Suggested": "{count} neue Vorschläge im Glossar.",
       "SuggestError": "Vorschläge fehlgeschlagen: {error}",
-      "SuggestingProgress": "Suche Namen und Begriffe … {done}/{total} Pakete"
+      "SuggestingProgress": "Suche Namen und Begriffe … {done}/{total} Pakete",
+      "Import": "Aus Kompendien",
+      "ImportTooltip": "Übernimmt deutsche Namen von Zaubern, Gegenständen und Monstern aus installierten Übersetzungsmodulen (Babele). Eigene Einträge haben Vorrang.",
+      "Imported": "{count} Begriffe aus Kompendien übernommen.",
+      "NoCompendia": "Keine übersetzten Kompendien gefunden. Ist ein deutsches dnd5e-Übersetzungsmodul mit Babele aktiv und Foundry auf Deutsch gestellt?",
+      "Hidden": "{count} weitere Einträge – Suche verwenden."
     },
     "Review": {
       "Title": "Übersetzung prüfen",

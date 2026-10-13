@@ -10,10 +10,11 @@ Style:
 - GM text (type "text"): clear, factual German.
 - Poems and riddles: re-create them in German (rhythm, rhyme if the original rhymes). A riddle must work in German; adapt its answer accordingly when it appears.
 - Rules terms: use the official German D&D 5e terminology, e.g. "DC 15 Intelligence (Investigation) check" → "SG-15-Intelligenzwurf (Nachforschungen)", "passive Perception" → "passive Weisheit (Wahrnehmung)", "saving throw" → "Rettungswurf", "gp" → "GM", spell and item names with their official German names.
+- Dice notation stays exactly as written (e.g. "1d8", "2d6 + 3", "1d100"); never convert "d" to "W". Foundry rolls depend on it.
 - Proper names of persons and places stay unchanged unless the glossary says otherwise.
 
 Input:
-- "glossary" (if present) is mandatory: render each English term exactly with the given German term; "de" equal to "en" means keep it unchanged. Inflect German terms grammatically where needed.
+- "glossary" (if present) is mandatory: render each English term exactly with the given German term; "de" equal to "en" means keep it unchanged. Inflect German terms grammatically where needed. Entries with kind "rules" (spells, items, monsters) apply only where the text refers to that game element, not to the ordinary English word.
 - "hint" (if present) is an extra instruction from the game master for this page; follow it.
 
 Format:
@@ -44,10 +45,28 @@ const RESPONSE_SCHEMA = {
 function buildInput(context, blocks, { notes = {}, glossary, hint } = {}) {
   return JSON.stringify({
     context,
-    ...(glossary?.length && { glossary: glossary.map(g => ({ en: g.source, de: g.target || g.source })) }),
+    ...(glossary?.length && { glossary: glossary.map(g => ({ en: g.source, de: g.target || g.source, ...(g.kind === "rules" && { kind: "rules" }) })) }),
     ...(hint && { hint }),
     blocks: blocks.map(b => ({ id: b.id, type: b.type, html: b.html, ...(notes[b.id] && { fix: notes[b.id] }) }))
   });
+}
+
+// Würfelangaben wie 1d8, 2d6 + 3, d20 (Foundry würfelt nur mit "d").
+const DICE_PATTERN = /\b\d*d\d+(?:\s*[+\-−]\s*\d+)?\b/gi;
+
+/** Würfelangaben eines HTML-Fragments, normalisiert und sortiert. */
+export function diceIn(html) {
+  const text = html.replace(/<[^>]+>/g, " ");
+  return (text.match(DICE_PATTERN) ?? []).map(d => d.toLowerCase().replace(/\s+/g, "").replace("−", "-")).sort();
+}
+
+/** Strukturprüfung + Würfelangaben müssen unverändert vorkommen. */
+function checkBlock(block, translated) {
+  const errors = validateBlock(block, translated);
+  const before = diceIn(block.html);
+  const after = diceIn(translated);
+  if (before.join() !== after.join()) errors.push(`Würfelangaben müssen unverändert bleiben: ${before.join(", ")}`);
+  return errors;
 }
 
 /** JSON aus der Antwort lesen; toleriert Codeblöcke oder Text drumherum (Modelle ohne Structured Output). */
@@ -108,7 +127,7 @@ export async function translateHtml({ html, context, glossary, hint, provider })
     notes = {};
     for (const block of pending) {
       const translated = result.get(block.id);
-      const errors = translated === undefined ? ["Block fehlt in der Antwort"] : validateBlock(block, translated);
+      const errors = translated === undefined ? ["Block fehlt in der Antwort"] : checkBlock(block, translated);
       if (errors.length) {
         retry.push(block);
         notes[block.id] = errors.join("; ");

@@ -1,6 +1,10 @@
 // Glossar-Editor: Einträge bearbeiten, Vorschläge übernehmen oder verwerfen.
 import { MODULE_ID } from "../store.js";
 import { getGlossary, setGlossary } from "../actions.js";
+import { compendiumTerms, mergeCompendiumTerms } from "../glossary.js";
+
+// Höchstens so viele Zeilen anzeigen (Kompendium-Import kann Tausende liefern).
+const MAX_ROWS = 300;
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -15,7 +19,8 @@ export class GlossaryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
       remove: GlossaryEditor.#onRemove,
       accept: GlossaryEditor.#onAccept,
       acceptAll: GlossaryEditor.#onAcceptAll,
-      rejectAll: GlossaryEditor.#onRejectAll
+      rejectAll: GlossaryEditor.#onRejectAll,
+      importCompendia: GlossaryEditor.#onImportCompendia
     }
   };
 
@@ -24,24 +29,32 @@ export class GlossaryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
     list: { template: `modules/${MODULE_ID}/templates/glossary/list.hbs`, scrollable: [""] }
   };
 
-  filter = "all";
+  filter = "own";
   search = "";
 
   async _prepareContext() {
     const term = this.search.trim().toLowerCase();
-    const entries = getGlossary()
-      .map((e, index) => ({ ...e, index }))
-      .filter(e => this.filter === "all" || (this.filter === "suggested") === !!e.suggested)
-      .filter(e => !term || e.source.toLowerCase().includes(term) || e.target.toLowerCase().includes(term));
+    const matchesFilter = {
+      all: () => true,
+      own: e => e.origin !== "compendium",
+      suggested: e => !!e.suggested,
+      compendium: e => e.origin === "compendium"
+    }[this.filter] ?? (() => true);
     const all = getGlossary();
+    const matching = all
+      .map((e, index) => ({ ...e, index }))
+      .filter(matchesFilter)
+      .filter(e => !term || e.source.toLowerCase().includes(term) || e.target.toLowerCase().includes(term));
+    const entries = matching.slice(0, MAX_ROWS);
     const kinds = ["name", "item", "rules"].map(value => ({ value, label: game.i18n.localize(`VTTTRANSLATE.Glossary.Kind.${value}`) }));
     for (const e of entries) e.kinds = kinds.map(k => ({ ...k, selected: k.value === e.kind }));
     return {
       entries,
       search: this.search,
-      filters: ["all", "suggested", "confirmed"].map(value => ({ value, label: game.i18n.localize(`VTTTRANSLATE.Glossary.Filter.${value}`), selected: value === this.filter })),
+      filters: ["own", "suggested", "compendium", "all"].map(value => ({ value, label: game.i18n.localize(`VTTTRANSLATE.Glossary.Filter.${value}`), selected: value === this.filter })),
       count: all.length,
-      suggested: all.filter(e => e.suggested).length
+      suggested: all.filter(e => e.suggested).length,
+      hidden: matching.length - entries.length
     };
   }
 
@@ -92,6 +105,15 @@ export class GlossaryEditor extends HandlebarsApplicationMixin(ApplicationV2) {
 
   static #onAcceptAll() {
     this.#save(getGlossary().map(({ suggested, ...e }) => e));
+  }
+
+  static async #onImportCompendia() {
+    const terms = await compendiumTerms(game.packs.contents);
+    if (!terms.length) return ui.notifications.warn(game.i18n.localize("VTTTRANSLATE.Glossary.NoCompendia"));
+    const { glossary, imported } = mergeCompendiumTerms(getGlossary(), terms);
+    this.filter = "compendium";
+    await this.#save(glossary);
+    ui.notifications.info(game.i18n.format("VTTTRANSLATE.Glossary.Imported", { count: imported }));
   }
 
   static #onRejectAll() {

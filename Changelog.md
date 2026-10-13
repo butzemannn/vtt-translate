@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 – 2026-10-12
+
+- Würfelangaben bleiben unverändert (`1d8` statt `1W8`): Regel im Prompt und Prüfung pro Absatz, sonst automatisch neu angefragt
+- Glossar „Aus Kompendien“: übernimmt deutsche Namen von Zaubern, Gegenständen und Monstern aus Babele-Übersetzungsmodulen (z. B. deutsche dnd5e-Übersetzung); eigene Einträge haben Vorrang, erneuter Import ersetzt den alten
+- Glossar-Treffer nur als ganzes Wort (Plural erlaubt): „Light“ greift nicht bei „lightning“
+- Regel-Einträge gelten nur, wo der Text das Spielelement meint
+- Glossar-Editor: Filter Eigene/Vorschläge/Kompendien/Alle, höchstens 300 Zeilen (Rest über Suche)
+
 ## 0.4.1 – 2026-10-12
 
 - Namen vorschlagen: kleinere Pakete (12k Zeichen), 3 parallel, wenig Denkaufwand – deutlich schneller bei vielen Seiten

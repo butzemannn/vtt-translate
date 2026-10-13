@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { samplePages } from "./setup.js";
-import { relevantTerms, mergeSuggestions, chunkTexts, suggestTerms } from "../scripts/glossary.js";
+import { relevantTerms, mergeSuggestions, chunkTexts, suggestTerms, compendiumTerms, mergeCompendiumTerms } from "../scripts/glossary.js";
 import { plainText } from "../scripts/html.js";
 
 const glossary = [
@@ -9,6 +9,13 @@ const glossary = [
   { source: "Raven Cane", target: "Rabenstock", kind: "item" },
   { source: "Igor", target: "", kind: "name", suggested: true }
 ];
+
+test("Ganze Wörter, Plural erlaubt, Sonderzeichen sicher", () => {
+  const g = [{ source: "Light", target: "Licht" }, { source: "Skeleton", target: "Skelett" }, { source: "Dr. Seward", target: "" }, { source: "Raven's Cane", target: "" }];
+  assert.deepEqual(relevantTerms(g, "Lightning strikes two skeletons near Dr. Seward.").map(t => t.source), ["Skeleton", "Dr. Seward"]);
+  assert.deepEqual(relevantTerms(g, "She casts light on Raven's Cane.").map(t => t.source), ["Light", "Raven's Cane"]);
+  assert.deepEqual(relevantTerms(g, "Dr Seward"), []);
+});
 
 test("Nur bestätigte, im Text vorkommende Einträge", () => {
   const terms = relevantTerms(glossary, "The raven cane belongs to Igor.");
@@ -68,4 +75,28 @@ test("suggestTerms: höchstens 3 Pakete gleichzeitig, wenig Denkaufwand, Ergebni
   assert.equal(maxActive, 3);
   assert.deepEqual(terms.map(t => t.source), ["a", "b", "c", "d", "e"]);
   assert.ok(efforts.every(e => e === "low"));
+});
+
+test("Kompendium-Begriffe aus Babele-Index", async () => {
+  const pack = (documentName, index) => ({ documentName, getIndex: async () => index });
+  const terms = await compendiumTerms([
+    pack("Item", [{ name: "Feuerball", originalName: "Fireball" }, { name: "Dagger" }, { name: "Licht", flags: { babele: { originalName: "Light" } } }]),
+    pack("Actor", [{ name: "Ghul", originalName: "Ghoul" }, { name: "Feuerball", originalName: "fireball" }]),
+    pack("JournalEntry", [{ name: "Regeln", originalName: "Rules" }])
+  ]);
+  assert.deepEqual(terms.map(t => `${t.source}→${t.target}`), ["Fireball→Feuerball", "Light→Licht", "Ghoul→Ghul"]);
+  assert.ok(terms.every(t => t.kind === "rules" && t.origin === "compendium"));
+});
+
+test("Kompendium-Import ersetzt alten Import, eigene Einträge haben Vorrang", () => {
+  const glossary = [
+    { source: "Fireball", target: "Feuerkugel", kind: "rules" },
+    { source: "Old", target: "Alt", kind: "rules", origin: "compendium" }
+  ];
+  const { glossary: merged, imported } = mergeCompendiumTerms(glossary, [
+    { source: "Fireball", target: "Feuerball", kind: "rules", origin: "compendium" },
+    { source: "Ghoul", target: "Ghul", kind: "rules", origin: "compendium" }
+  ]);
+  assert.equal(imported, 1);
+  assert.deepEqual(merged.map(g => `${g.source}→${g.target}`), ["Fireball→Feuerkugel", "Ghoul→Ghul"]);
 });

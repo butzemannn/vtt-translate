@@ -41,5 +41,5 @@
 
 - Seite: `flags.vtt-translate.translation = { original, status, hash, model, usage, measure, duration, translatedAt }`
   - `usage` = echte Tokens, `measure` = Zeichenzahlen der Anfrage, `duration` = Sekunden → Kalibrierung von Kosten- und Zeitschätzung
-- World-Setting `vtt-translate.glossary = { entries: [{ source, target, kind, suggested? }] }`
+- World-Setting `vtt-translate.glossary = { entries: [{ source, target, kind, suggested?, origin? }] }` (`origin: "compendium"` = aus Kompendien importiert)
 - Client-Setting `vtt-translate.queue = { pending: [uuid], errors: {uuid: text} }` – nach Neuladen pausiert, „Fortsetzen“ startet erneut

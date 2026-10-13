@@ -72,9 +72,10 @@
       },
       "KindLabel": "Kind",
       "Filter": {
-        "all": "All",
+        "own": "Own",
         "suggested": "Suggestions",
-        "confirmed": "Confirmed"
+        "compendium": "From compendia",
+        "all": "All"
       },
       "Add": "New",
       "AcceptAll": "Accept all {count}",
@@ -92,7 +93,12 @@
       "Suggesting": "Looking for names and terms …",
       "Suggested": "{count} new suggestions in the glossary.",
       "SuggestError": "Suggestions failed: {error}",
-      "SuggestingProgress": "Looking for names and terms … {done}/{total} chunks"
+      "SuggestingProgress": "Looking for names and terms … {done}/{total} chunks",
+      "Import": "From compendia",
+      "ImportTooltip": "Imports German names of spells, items and monsters from installed translation modules (Babele). Own entries take precedence.",
+      "Imported": "{count} terms imported from compendia.",
+      "NoCompendia": "No translated compendia found. Is a German dnd5e translation module with Babele active and Foundry set to German?",
+      "Hidden": "{count} more entries – use search."
     },
     "Review": {
       "Title": "Review translation",

@@ -3,6 +3,7 @@
     {{#each filters}}<option value="{{value}}" {{#if selected}}selected{{/if}}>{{label}}</option>{{/each}}
   </select>
   <input type="search" name="search" value="{{search}}" placeholder="{{localize 'VTTTRANSLATE.Center.Search'}}">
+  <button type="button" data-action="importCompendia" data-tooltip="{{localize 'VTTTRANSLATE.Glossary.ImportTooltip'}}"><i class="fa-solid fa-book-bookmark"></i> {{localize "VTTTRANSLATE.Glossary.Import"}}</button>
   <button type="button" data-action="add"><i class="fa-solid fa-plus"></i> {{localize "VTTTRANSLATE.Glossary.Add"}}</button>
   {{#if suggested}}
   <button type="button" data-action="acceptAll"><i class="fa-solid fa-check-double"></i> {{localize "VTTTRANSLATE.Glossary.AcceptAll" count=suggested}}</button>
