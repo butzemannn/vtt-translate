@@ -21,6 +21,11 @@ export function getOriginal(page) {
   return getTranslation(page)?.original ?? page.text.content ?? "";
 }
 
+/** Original-Seitenname (vor der ersten Übersetzung des Namens). */
+export function getOriginalName(page) {
+  return getTranslation(page)?.originalName ?? page.name;
+}
+
 export function isTranslated(page) {
   return !!getTranslation(page);
 }
@@ -50,11 +55,14 @@ export async function setReviewed(page) {
  * Schreibt die Übersetzung; das Original wird nur beim ersten Mal gesichert.
  * measure = Zeichenzahlen der Anfrage, usage = echte Tokens, duration = Sekunden (für Kosten- und Zeitschätzung).
  */
-export async function saveTranslation(page, html, { model, failed, usage, measure, duration }) {
+export async function saveTranslation(page, html, { model, failed, usage, measure, duration, title }) {
+  const originalName = getTranslation(page)?.originalName ?? (title ? page.name : undefined);
   await page.update({
     "text.content": html,
+    ...(title && { name: title }),
     [`flags.${MODULE_ID}.${FLAG}`]: {
       original: getOriginal(page),
+      ...(originalName && { originalName }),
       status: failed ? "partial" : "translated",
       model,
       usage,
@@ -72,7 +80,7 @@ export async function saveTranslation(page, html, { model, failed, usage, measur
 export async function restoreOriginal(page) {
   const data = getTranslation(page);
   if (!data) return false;
-  await page.update({ "text.content": data.original });
+  await page.update({ "text.content": data.original, ...(data.originalName && { name: data.originalName }) });
   await page.unsetFlag(MODULE_ID, FLAG);
   return true;
 }

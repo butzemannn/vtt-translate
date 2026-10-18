@@ -38,6 +38,14 @@ Hooks.once("init", () => {
   });
   // Offene Batch-Seiten, damit ein Lauf nach Neuladen fortgesetzt werden kann.
   game.settings.register(MODULE_ID, "queue", { scope: "client", config: false, type: Object, default: {} });
+  game.settings.register(MODULE_ID, "translatePageNames", {
+    name: "VTTTRANSLATE.Settings.PageNames.Name",
+    hint: "VTTTRANSLATE.Settings.PageNames.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: true
+  });
   game.settings.register(MODULE_ID, "autoTranslate", {
     name: "VTTTRANSLATE.Settings.AutoTranslate.Name",
     hint: "VTTTRANSLATE.Settings.AutoTranslate.Hint",

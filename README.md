@@ -4,7 +4,7 @@ Foundry-VTT-Modul (v14), das Journal-Seiten per LLM ins Deutsche übersetzt – 
 
 ## Stand
 
-Version 0.6.0 – Übersetzungs-Zentrale mit Batch und Kostenschätzung, Glossar mit Vorschlägen, Prüf-Ansicht. Anbieter: Claude (Anthropic) oder OpenRouter. Plan: `instructions/plan.md`.
+Version 0.7.0 – Übersetzungs-Zentrale mit Batch und Kostenschätzung, Glossar mit Vorschlägen, Prüf-Ansicht. Anbieter: Claude (Anthropic) oder OpenRouter. Plan: `instructions/plan.md`.
 
 ## Installation
 
@@ -25,6 +25,7 @@ Für Entwicklung alternativ per Symlink: `ln -s /pfad/zu/vtt-translate <Foundry-
 - **Prüfen:** Zentrale → **Prüfen** (Auswahl oder alle ungeprüften) → absatzweise EN/DE vergleichen, ggf. mit Hinweis neu übersetzen.
 - **Vor der Sitzung:** Szenen-Seitenleiste → Rechtsklick auf Szene → **Szene vorbereiten** (oder Zentrale → **Aktuelle Szene**) → Übersetzen.
 - **Automatisch:** Einstellung „Beim Öffnen übersetzen“ – Journale werden übersetzt, sobald der GM sie öffnet.
+- **Namen:** Seitennamen kommen automatisch mit. Journal-, Ordner-, Szenennamen und Pin-Beschriftungen: Zentrale → **Namen**.
 - **Eine Seite:** Journal öffnen → Menü oben rechts → **Seite übersetzen** bzw. **Original wiederherstellen**.
 
 ## Entwicklung

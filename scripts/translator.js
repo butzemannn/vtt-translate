@@ -1,6 +1,6 @@
 // Übersetzt eine Seite: Blöcke bilden, Prompt bauen, Provider aufrufen, prüfen, zurückschreiben.
 // Bewusst ohne Foundry-Abhängigkeit, damit es in Node testbar ist.
-import { splitBlocks, validateBlock, applyBlock, joinBlocks } from "./html.js";
+import { splitBlocks, validateBlock, applyBlock, joinBlocks, plainText } from "./html.js";
 
 const SYSTEM_PROMPT = `You translate content of a Dungeons & Dragons 5e adventure (Curse of Strahd, gothic horror) from English into German for a German gaming group.
 
@@ -8,6 +8,7 @@ Style:
 - Read-aloud boxes (type "readaloud") are narrated to the players: atmospheric, dark, elevated German prose. Address the group as "Ihr/Euch/Euer".
 - Letters, diaries, inscriptions: old-fashioned language matching the age and character of the author.
 - GM text (type "text"): clear, factual German.
+- Page title (type "title"): short and fitting as a heading; keep numbering and letters (e.g. "Cell b. Skeleton" → "Zelle b. Skelett").
 - Poems and riddles: re-create them in German (rhythm, rhyme if the original rhymes). A riddle must work in German; adapt its answer accordingly when it appears.
 - Rules terms: use the official German D&D 5e terminology, e.g. "DC 15 Intelligence (Investigation) check" → "SG-15-Intelligenzwurf (Nachforschungen)", "passive Perception" → "passive Weisheit (Wahrnehmung)", "saving throw" → "Rettungswurf", "gp" → "GM", spell and item names with their official German names.
 - Dice notation stays exactly as written (e.g. "1d8", "2d6 + 3", "1d100"); never convert "d" to "W". Foundry rolls depend on it.
@@ -109,15 +110,19 @@ export function measureHtml(html, context = {}, glossary) {
  * @param {object} args.context         z. B. {journal, folder, page}
  * @param {{source:string,target:string}[]} [args.glossary]  nur die für diese Seite relevanten Einträge
  * @param {string} [args.hint]  zusätzliche Anweisung des GM
+ * @param {string} [args.title]  Seitenname – wird in derselben Anfrage mit übersetzt
  * @param {{translate: Function}} args.provider
- * @returns {Promise<{html: string, failed: number, total: number, usage: {input: number, output: number}}>}
+ * @returns {Promise<{html: string, title?: string, failed: number, total: number, usage: {input: number, output: number}}>}
  */
-export async function translateHtml({ html, context, glossary, hint, provider }) {
+export async function translateHtml({ html, context, glossary, hint, title, provider }) {
   const { root, blocks } = splitBlocks(html);
   const usage = { input: 0, output: 0 };
-  if (!blocks.length) return { html, failed: 0, total: 0, usage };
+  // Titel als zusätzlicher Block ohne Elemente (nächste freie ID).
+  const titleBlock = title?.trim() ? { id: blocks.length, type: "title", html: escapeText(title.trim()), attrs: [], refs: [] } : null;
+  if (!blocks.length && !titleBlock) return { html, failed: 0, total: 0, usage };
 
-  let pending = blocks;
+  let translatedTitle;
+  let pending = titleBlock ? [...blocks, titleBlock] : blocks;
   let notes = {};
 
   // Erster Versuch für alle Blöcke, zweiter nur für fehlerhafte (mit Fehlerhinweis).
@@ -131,6 +136,8 @@ export async function translateHtml({ html, context, glossary, hint, provider })
       if (errors.length) {
         retry.push(block);
         notes[block.id] = errors.join("; ");
+      } else if (block === titleBlock) {
+        translatedTitle = plainText(translated);
       } else {
         applyBlock(block, translated);
       }
@@ -139,5 +146,10 @@ export async function translateHtml({ html, context, glossary, hint, provider })
   }
 
   // Fehlgeschlagene Blöcke bleiben im Original stehen.
-  return { html: joinBlocks(root), failed: pending.length, total: blocks.length, usage };
+  const failed = pending.filter(b => b !== titleBlock).length;
+  return { html: blocks.length ? joinBlocks(root) : html, ...(translatedTitle && { title: translatedTitle }), failed, total: blocks.length, usage };
+}
+
+function escapeText(text) {
+  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

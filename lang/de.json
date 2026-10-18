@@ -15,6 +15,10 @@
       "AutoTranslate": {
         "Name": "Beim Öffnen übersetzen",
         "Hint": "Öffnet der GM ein Journal mit noch englischen Seiten, werden diese automatisch im Hintergrund übersetzt (kostet API-Guthaben)."
+      },
+      "PageNames": {
+        "Name": "Seitennamen mit übersetzen",
+        "Hint": "Beim Übersetzen einer Seite wird ihr Name in derselben Anfrage mit übersetzt. Links ohne eigenen Text zeigen dann ebenfalls den deutschen Namen."
       }
     },
     "Controls": {
@@ -125,6 +129,26 @@
       "NoPages": "Auf „{name}“ sind keine Journal-Seiten verlinkt.",
       "Prepared": "„{name}“: {total} verlinkte Seiten, {open} noch zu übersetzen – ausgewählt.",
       "AutoStarted": "„{name}“: {count} Seiten werden im Hintergrund übersetzt."
+    },
+    "Names": {
+      "Button": "Namen",
+      "Tooltip": "Journal-, Ordner-, Szenennamen und Pin-Beschriftungen übersetzen",
+      "Title": "Namen übersetzen",
+      "Intro": "Kurze Namen werden gebündelt übersetzt (Glossar gilt). Originale werden gesichert und lassen sich wiederherstellen. Seitennamen werden mit den Seiten übersetzt.",
+      "Kind": {
+        "journal": "Journal-Namen",
+        "folder": "Ordner (Journale und Szenen)",
+        "scene": "Szenennamen",
+        "note": "Pin-Beschriftungen"
+      },
+      "Counts": "{open} offen, {done} übersetzt",
+      "Translate": "Offene übersetzen",
+      "Restore": "Wiederherstellen",
+      "Running": "Übersetze Namen …",
+      "Done": "{count} von {total} Namen übersetzt.",
+      "Restored": "{count} Namen wiederhergestellt.",
+      "Nothing": "Keine offenen Namen.",
+      "Error": "Namen übersetzen fehlgeschlagen: {error}"
     }
   }
 }

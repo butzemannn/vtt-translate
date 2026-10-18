@@ -63,6 +63,9 @@
 .vtt-translate-review .vtt-cell img { max-width: 100%; height: auto; }
 .vtt-translate-review .vtt-empty { padding: 2rem; text-align: center; opacity: 0.7; }
 
+/* Namen-Dialog */
+.vtt-name-kind { display: flex; align-items: center; gap: 0.4rem; margin: 0.2rem 0; }
+
 /* Statusfarben (Zentrale und Seitenleiste) */
 .status-translated > .vtt-status, .vtt-translate-status.status-translated { color: #3a9a4a; }
 .status-partial > .vtt-status, .vtt-translate-status.status-partial { color: #d08a1e; }

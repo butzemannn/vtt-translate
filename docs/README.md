@@ -13,6 +13,8 @@
 | `scripts/glossary.js` | Glossar: relevante Einträge je Seite, Vorschläge per LLM ([ADR 0005](adr/0005-glossar.md)) |
 | `scripts/ui/glossary-editor.js`, `templates/glossary/` | Glossar-Editor |
 | `scripts/ui/review.js`, `templates/review.hbs` | Prüf-Ansicht (Blöcke gepaart über `pairBlocks`) |
+| `scripts/names.js` | Kurze Namen gebündelt übersetzen |
+| `scripts/name-targets.js` | Namensfelder sammeln, gebündelt speichern, wiederherstellen |
 | `scripts/scene.js` | Seiten einer Szene sammeln (Pins + verlinkte Seiten) |
 | `scripts/ui/windows.js` | Einzelinstanzen von Glossar und Prüf-Ansicht |
 | `scripts/translator.js` | Prompt, Anfrage, Prüfung, Wiederholung |
@@ -40,7 +42,8 @@
 
 ## Daten
 
-- Seite: `flags.vtt-translate.translation = { original, status, hash, model, usage, measure, duration, translatedAt }`
+- Seite: `flags.vtt-translate.translation = { original, originalName?, status, hash, model, usage, measure, duration, reviewed, translatedAt }`
+- Journal/Ordner/Szene/Pin: `flags.vtt-translate.names = { <feld>: Original | null }` (Felder `name`, `navName`, `text`)
   - `usage` = echte Tokens, `measure` = Zeichenzahlen der Anfrage, `duration` = Sekunden → Kalibrierung von Kosten- und Zeitschätzung
 - World-Setting `vtt-translate.glossary = { entries: [{ source, target, kind, suggested?, origin? }] }` (`origin: "compendium"` = aus Kompendien importiert)
 - Client-Setting `vtt-translate.queue = { pending: [uuid], errors: {uuid: text} }` – nach Neuladen pausiert, „Fortsetzen“ startet erneut

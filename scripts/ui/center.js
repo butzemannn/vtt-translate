@@ -8,6 +8,9 @@ import { loadPrices, calibrate, estimateCost, estimateSeconds, formatDuration, t
 import { buildRows, STATUS } from "./rows.js";
 import { pageContext, restorePage, currentProvider, getGlossary, setGlossary } from "../actions.js";
 import { CONCURRENCY } from "../queue.js";
+import { NAME_KINDS, nameTargets, applyNames, restoreNames } from "../name-targets.js";
+import { translateNames } from "../names.js";
+import { relevantTerms } from "../glossary.js";
 
 const { ApplicationV2, HandlebarsApplicationMixin, DialogV2 } = foundry.applications.api;
 const TEMPLATES = `modules/${MODULE_ID}/templates/center`;
@@ -31,7 +34,8 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
       glossary: () => openGlossary(),
       suggest: TranslationCenter.#onSuggest,
       review: TranslationCenter.#onReview,
-      scene: function () { this.prepareScene?.(); }
+      scene: function () { this.prepareScene?.(); },
+      names: TranslationCenter.#onNames
     }
   };
 
@@ -267,6 +271,61 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
     }
     if (!pages.length) return ui.notifications.warn(game.i18n.localize("VTTTRANSLATE.Review.Empty"));
     openReview(pages.map(p => p.uuid));
+  }
+
+  /** Dialog: Journal-, Ordner-, Szenennamen und Pin-Beschriftungen übersetzen oder wiederherstellen. */
+  static async #onNames() {
+    const world = () => ({
+      journals: game.journal.contents,
+      folders: game.folders.filter(f => ["JournalEntry", "Scene"].includes(f.type)),
+      scenes: game.scenes.contents
+    });
+    const rows = NAME_KINDS.map(kind => {
+      const targets = nameTargets([kind], world());
+      const done = targets.filter(t => t.translated).length;
+      const label = game.i18n.localize(`VTTTRANSLATE.Names.Kind.${kind}`);
+      const counts = game.i18n.format("VTTTRANSLATE.Names.Counts", { open: targets.length - done, done });
+      return `<label class="vtt-name-kind"><input type="checkbox" name="${kind}" checked> ${label} <small>(${counts})</small></label>`;
+    }).join("");
+
+    const choice = await DialogV2.wait({
+      window: { title: "VTTTRANSLATE.Names.Title" },
+      content: `<p>${game.i18n.localize("VTTTRANSLATE.Names.Intro")}</p>${rows}`,
+      buttons: [
+        { action: "translate", label: "VTTTRANSLATE.Names.Translate", icon: "fa-solid fa-language", default: true, callback: (event, button) => ({ action: "translate", kinds: NAME_KINDS.filter(k => button.form.elements[k]?.checked) }) },
+        { action: "restore", label: "VTTTRANSLATE.Names.Restore", icon: "fa-solid fa-rotate-left", callback: (event, button) => ({ action: "restore", kinds: NAME_KINDS.filter(k => button.form.elements[k]?.checked) }) },
+        { action: "cancel", label: "Cancel" }
+      ],
+      rejectClose: false
+    });
+    if (!choice?.kinds?.length) return;
+
+    if (choice.action === "restore") {
+      const count = await restoreNames(nameTargets(choice.kinds, world()));
+      return ui.notifications.info(game.i18n.format("VTTTRANSLATE.Names.Restored", { count }));
+    }
+
+    const targets = nameTargets(choice.kinds, world()).filter(t => !t.translated);
+    if (!targets.length) return ui.notifications.info(game.i18n.localize("VTTTRANSLATE.Names.Nothing"));
+    const note = ui.notifications.info(game.i18n.localize("VTTTRANSLATE.Names.Running"), { progress: true });
+    try {
+      const { provider } = currentProvider();
+      const glossary = getGlossary();
+      const { texts } = await translateNames({
+        items: targets,
+        glossaryFor: text => relevantTerms(glossary, text),
+        provider,
+        onProgress: (done, total) => note?.update?.({ pct: done / total })
+      });
+      const count = await applyNames(targets, texts);
+      ui.notifications.info(game.i18n.format("VTTTRANSLATE.Names.Done", { count, total: targets.length }));
+    } catch (err) {
+      console.error(`${MODULE_ID} |`, err);
+      ui.notifications.error(game.i18n.format("VTTTRANSLATE.Names.Error", { error: err.message }));
+    } finally {
+      note?.remove?.();
+      this.render({ parts: ["list"] });
+    }
   }
 
   static #onPause() { this.queue.pause(); }

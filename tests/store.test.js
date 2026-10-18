@@ -56,3 +56,15 @@ test("Geprüft: übernimmt Handänderungen, neue Übersetzung setzt zurück", as
   await saveTranslation(page, "<p>Servus</p>", { model: "m", failed: 0 });
   assert.equal(pageStatus(page), "translated");
 });
+
+test("Seitenname: Original beim ersten Mal sichern, beim Wiederherstellen zurück", async () => {
+  const page = fakePage("<p>Hello</p>");
+  page.name = "Attic";
+  await saveTranslation(page, "<p>Hallo</p>", { model: "m", failed: 0, title: "Dachboden" });
+  assert.equal(page.name, "Dachboden");
+  await saveTranslation(page, "<p>Hallo!</p>", { model: "m", failed: 0, title: "Speicher" });
+  assert.equal(page.name, "Speicher");
+  assert.equal(page.flags["vtt-translate"].translation.originalName, "Attic");
+  await restoreOriginal(page);
+  assert.equal(page.name, "Attic");
+});

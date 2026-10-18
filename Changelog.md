@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.0 – 2026-10-18
+
+- **Seitennamen** werden mit dem Seitentext in derselben Anfrage übersetzt (Einstellung, standardmäßig an); Links ohne eigenen Text zeigen damit den deutschen Namen; Wiederherstellen setzt auch den Namen zurück
+- **Dialog „Namen“** in der Zentrale: Journal-, Ordner-, Szenennamen und Pin-Beschriftungen gebündelt übersetzen oder wiederherstellen; Glossar gilt
+
 ## 0.6.0 – 2026-10-18
 
 - **Szene vorbereiten**: Kontextmenü an Szenen bzw. „Aktuelle Szene“ in der Zentrale wählt alle über Pins verlinkten Seiten aus, inkl. per Link verwiesener Seiten (z. B. Gegenstände); Kosten/Dauer sofort sichtbar

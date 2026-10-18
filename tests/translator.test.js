@@ -79,3 +79,25 @@ test("Würfel in Enrichern zählen nicht als Text", async () => {
   const [block] = splitBlocks(`<p>Pouch with [[/r 1d10+10]] gp</p>`).blocks;
   assert.deepEqual(diceIn(block.html), []);
 });
+
+test("Seitenname wird in derselben Anfrage übersetzt", async () => {
+  const provider = fakeProvider(b => (b.type === "title" ? "Zelle b. Spinnen &amp; Co" : b.html.replace("Empty", "Leer")));
+  const result = await translateHtml({ html: "<p>Empty</p>", title: "Cell b. Spiders & Co", context, provider });
+  assert.equal(provider.calls.length, 1);
+  assert.deepEqual(provider.calls[0].map(b => b.type), ["text", "title"]);
+  assert.equal(provider.calls[0][1].html, "Cell b. Spiders &amp; Co");
+  assert.equal(result.title, "Zelle b. Spinnen & Co");
+  assert.equal(result.html, "<p>Leer</p>");
+  assert.equal(result.failed, 0);
+});
+
+test("Titel mit Tags wird abgelehnt, Seite ohne Text nur mit Titel", async () => {
+  const bad = fakeProvider(b => "<b>Fett</b>");
+  const r1 = await translateHtml({ html: "", title: "Attic", context, provider: bad });
+  assert.equal(r1.title, undefined);
+  assert.equal(bad.calls.length, 2);
+  const good = fakeProvider(() => "Dachboden");
+  const r2 = await translateHtml({ html: "<p></p>", title: "Attic", context, provider: good });
+  assert.equal(r2.title, "Dachboden");
+  assert.equal(r2.html, "<p></p>");
+});

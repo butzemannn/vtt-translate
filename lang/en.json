@@ -15,6 +15,10 @@
       "AutoTranslate": {
         "Name": "Translate on open",
         "Hint": "When the GM opens a journal with pages still in English, they are translated automatically in the background (uses API credit)."
+      },
+      "PageNames": {
+        "Name": "Translate page names too",
+        "Hint": "When a page is translated, its name is translated in the same request. Links without their own label then show the German name as well."
       }
     },
     "Controls": {
@@ -125,6 +129,26 @@
       "NoPages": "No journal pages are linked on \"{name}\".",
       "Prepared": "\"{name}\": {total} linked pages, {open} still to translate – selected.",
       "AutoStarted": "\"{name}\": {count} pages are being translated in the background."
+    },
+    "Names": {
+      "Button": "Names",
+      "Tooltip": "Translate journal, folder and scene names and pin labels",
+      "Title": "Translate names",
+      "Intro": "Short names are translated in batches (glossary applies). Originals are kept and can be restored. Page names are translated together with the pages.",
+      "Kind": {
+        "journal": "Journal names",
+        "folder": "Folders (journals and scenes)",
+        "scene": "Scene names",
+        "note": "Pin labels"
+      },
+      "Counts": "{open} open, {done} translated",
+      "Translate": "Translate open",
+      "Restore": "Restore",
+      "Running": "Translating names …",
+      "Done": "{count} of {total} names translated.",
+      "Restored": "{count} names restored.",
+      "Nothing": "No open names.",
+      "Error": "Translating names failed: {error}"
     }
   }
 }

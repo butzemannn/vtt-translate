@@ -1,5 +1,5 @@
 // Übersetzen/Wiederherstellen einer Seite in Foundry – genutzt vom Journal-Knopf und der Warteschlange.
-import { MODULE_ID, getOriginal, saveTranslation, restoreOriginal } from "./store.js";
+import { MODULE_ID, getOriginal, getOriginalName, saveTranslation, restoreOriginal } from "./store.js";
 import { translateHtml, measureHtml } from "./translator.js";
 import { plainText } from "./html.js";
 import { relevantTerms } from "./glossary.js";
@@ -26,7 +26,7 @@ export function pageGlossary(page, html = getOriginal(page)) {
 
 export function pageContext(page) {
   const entry = page.parent;
-  return { journal: entry.name, folder: folderPath(entry), page: page.name };
+  return { journal: entry.name, folder: folderPath(entry), page: getOriginalName(page) };
 }
 
 /** Provider gemäß Einstellungen; wirft ohne API-Key. */
@@ -50,9 +50,10 @@ export async function translatePage(page, { hint } = {}) {
   const context = pageContext(page);
   const glossary = pageGlossary(page, html);
   const started = Date.now();
-  const result = await translateHtml({ html, context, glossary, hint, provider });
+  const title = game.settings.get(MODULE_ID, "translatePageNames") ? getOriginalName(page) : undefined;
+  const result = await translateHtml({ html, context, glossary, hint, title, provider });
   const duration = (Date.now() - started) / 1000;
-  await saveTranslation(page, result.html, { model, failed: result.failed, usage: result.usage, measure: measureHtml(html, context, glossary), duration });
+  await saveTranslation(page, result.html, { model, failed: result.failed, usage: result.usage, measure: measureHtml(html, context, glossary), duration, title: result.title });
   return result;
 }
 
