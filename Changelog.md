@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1 – 2026-10-18
+
+- Dialog „Namen“: neue Option „Seitennamen bereits übersetzter Seiten“ – holt die Namen von Seiten nach, die vor 0.7.0 übersetzt wurden, gebündelt und ohne den Seitentext erneut zu übersetzen
+
 ## 0.7.0 – 2026-10-18
 
 - **Seitennamen** werden mit dem Seitentext in derselben Anfrage übersetzt (Einstellung, standardmäßig an); Links ohne eigenen Text zeigen damit den deutschen Namen; Wiederherstellen setzt auch den Namen zurück

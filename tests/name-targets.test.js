@@ -18,7 +18,13 @@ function makeWorld() {
   const journals = [], scenes = [];
   const Journal = cls("JournalEntry", () => journals);
   const Scene = cls("Scene", () => scenes);
-  journals.push({ id: "j1", name: "2. Manor", documentName: "JournalEntry", constructor: Journal, folder: { name: "Death House" } });
+  const journal = { id: "j1", name: "2. Manor", documentName: "JournalEntry", constructor: Journal, folder: { name: "Death House" }, uuid: "JournalEntry.j1", pages: [] };
+  journal.updateEmbeddedDocuments = async (type, updates) => { log.push(`${type}@j1:${updates.length}`); for (const u of updates) apply(journal.pages.find(p => p.id === u._id), u); };
+  journal.pages.push(
+    { id: "p1", name: "Attic", documentName: "JournalEntryPage", parent: journal, flags: { "vtt-translate": { translation: { original: "<p>x</p>" } } } },
+    { id: "p2", name: "Cellar", documentName: "JournalEntryPage", parent: journal, flags: {} }
+  );
+  journals.push(journal);
   const scene = { id: "s1", name: "Death House", navName: "", documentName: "Scene", constructor: Scene, uuid: "Scene.s1", notes: [] };
   scene.updateEmbeddedDocuments = async (type, updates) => { log.push(`${type}@s1:${updates.length}`); for (const u of updates) apply(scene.notes.find(n => n.id === u._id), u); };
   scene.notes.push({ id: "n1", text: "Foyer", documentName: "Note", parent: scene }, { id: "n2", text: "", documentName: "Note", parent: scene });
@@ -49,4 +55,23 @@ test("Übersetzen speichert gebündelt mit Original, erneutes Sammeln liefert Or
   assert.equal(journals[0].name, "2. Manor");
   assert.equal(scene.notes[0].text, "Foyer");
   assert.equal(nameTargets(["journal"], world)[0].translated, false);
+});
+
+test("Namen bereits übersetzter Seiten: nur Seiten mit übersetztem Text, Original im Übersetzungs-Flag", async () => {
+  const { world, log, journals } = makeWorld();
+  let targets = nameTargets(["page"], world);
+  assert.deepEqual(targets.map(t => [t.text, t.context, t.translated]), [["Attic", "2. Manor", false]]);
+
+  await applyNames(targets, ["Dachboden"]);
+  const page = journals[0].pages[0];
+  assert.deepEqual(log, ["JournalEntryPage@j1:1"]);
+  assert.equal(page.name, "Dachboden");
+  assert.equal(page.flags["vtt-translate"].translation.originalName, "Attic");
+  assert.equal(page.flags["vtt-translate"].translation.original, "<p>x</p>", "Rest des Flags bleibt");
+
+  targets = nameTargets(["page"], world);
+  assert.equal(targets[0].translated, true);
+  await restoreNames(targets);
+  assert.equal(page.name, "Attic");
+  assert.equal(page.flags["vtt-translate"].translation.originalName, null);
 });

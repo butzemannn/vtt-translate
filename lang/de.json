@@ -134,8 +134,9 @@
       "Button": "Namen",
       "Tooltip": "Journal-, Ordner-, Szenennamen und Pin-Beschriftungen übersetzen",
       "Title": "Namen übersetzen",
-      "Intro": "Kurze Namen werden gebündelt übersetzt (Glossar gilt). Originale werden gesichert und lassen sich wiederherstellen. Seitennamen werden mit den Seiten übersetzt.",
+      "Intro": "Kurze Namen werden gebündelt übersetzt (Glossar gilt). Originale werden gesichert und lassen sich wiederherstellen. Neue Seiten bekommen ihren Namen automatisch beim Übersetzen; hier lassen sich die Namen früher übersetzter Seiten nachholen.",
       "Kind": {
+        "page": "Seitennamen bereits übersetzter Seiten",
         "journal": "Journal-Namen",
         "folder": "Ordner (Journale und Szenen)",
         "scene": "Szenennamen",

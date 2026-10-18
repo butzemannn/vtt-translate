@@ -134,8 +134,9 @@
       "Button": "Names",
       "Tooltip": "Translate journal, folder and scene names and pin labels",
       "Title": "Translate names",
-      "Intro": "Short names are translated in batches (glossary applies). Originals are kept and can be restored. Page names are translated together with the pages.",
+      "Intro": "Short names are translated in batches (glossary applies). Originals are kept and can be restored. New pages get their name translated automatically; here you can catch up on pages translated earlier.",
       "Kind": {
+        "page": "Page names of already translated pages",
         "journal": "Journal names",
         "folder": "Folders (journals and scenes)",
         "scene": "Scene names",
