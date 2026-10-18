@@ -1,5 +1,6 @@
 // Einstiegspunkt: Einstellungen, Knöpfe im Journal-Fenster, Zentrale und Seitenleiste.
-import { MODULE_ID, isTranslated, pageStatus } from "./store.js";
+import { MODULE_ID, isTranslated, pageStatus, getOriginal } from "./store.js";
+import { collectScenePages } from "./scene.js";
 import { translatePage, restorePage } from "./actions.js";
 import { TranslationQueue } from "./queue.js";
 import { TranslationCenter } from "./ui/center.js";
@@ -37,6 +38,14 @@ Hooks.once("init", () => {
   });
   // Offene Batch-Seiten, damit ein Lauf nach Neuladen fortgesetzt werden kann.
   game.settings.register(MODULE_ID, "queue", { scope: "client", config: false, type: Object, default: {} });
+  game.settings.register(MODULE_ID, "autoTranslate", {
+    name: "VTTTRANSLATE.Settings.AutoTranslate.Name",
+    hint: "VTTTRANSLATE.Settings.AutoTranslate.Hint",
+    scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+  });
   game.settings.register(MODULE_ID, "glossary", { scope: "world", config: false, type: Object, default: { entries: [] } });
 });
 
@@ -52,15 +61,53 @@ Hooks.once("ready", () => {
     save: state => game.settings.set(MODULE_ID, "queue", state),
     onChange: () => center?.refresh()
   });
-  game.modules.get(MODULE_ID).api = { openCenter, openGlossary, openReview };
+  game.modules.get(MODULE_ID).api = { openCenter, openGlossary, openReview, prepareScene };
   ui.journal?.render(); // Seitenleiste wurde vor "ready" ohne Knopf gerendert
   if (queue.pending.length) ui.notifications.info(game.i18n.format("VTTTRANSLATE.Notify.Resumable", { count: queue.pending.length }));
 });
 
-function openCenter() {
-  center ??= new TranslationCenter(queue);
+/** Öffnet die Zentrale; optional mit vorausgewählten Seiten. */
+function openCenter({ select } = {}) {
+  center ??= new TranslationCenter(queue, { prepareScene });
+  if (select) center.selectOnly(select);
   center.render({ force: true });
 }
+
+/** Szene vorbereiten: alle über Pins verlinkten Seiten (plus verlinkte Gegenstände) in der Zentrale auswählen. */
+function prepareScene(scene = canvas?.scene) {
+  if (!scene) return ui.notifications.warn(game.i18n.localize("VTTTRANSLATE.Scene.NoScene"));
+  const resolve = (uuid, page) => {
+    try {
+      return fromUuidSync(uuid, { relative: page, strict: false });
+    } catch {
+      return null;
+    }
+  };
+  const pages = collectScenePages(scene, resolve, getOriginal);
+  if (!pages.length) return ui.notifications.warn(game.i18n.format("VTTTRANSLATE.Scene.NoPages", { name: scene.name }));
+  const open = pages.filter(p => ["open", "partial"].includes(pageStatus(p)));
+  ui.notifications.info(game.i18n.format("VTTTRANSLATE.Scene.Prepared", { name: scene.name, total: pages.length, open: open.length }));
+  openCenter({ select: open.map(p => p.uuid) });
+}
+
+// Kontextmenü der Szenen-Seitenleiste (v14: label/icon/visible/onClick).
+Hooks.on("getSceneContextOptions", (app, items) => {
+  items.push({
+    label: game.i18n.localize("VTTTRANSLATE.Scene.Prepare"),
+    icon: "fa-solid fa-language",
+    visible: () => game.user.isGM && !!queue,
+    onClick: (event, target) => prepareScene(game.scenes.get(target.closest("[data-entry-id]")?.dataset.entryId))
+  });
+});
+
+// Optional: noch offene Seiten beim ersten Öffnen eines Journals übersetzen.
+Hooks.on("renderJournalEntrySheet", (app, element, context, options) => {
+  if (!options?.isFirstRender || !game.user.isGM || !queue || !game.settings.get(MODULE_ID, "autoTranslate")) return;
+  const open = app.document.pages.filter(p => p.type === "text" && pageStatus(p) === "open" && !queue.statusOf(p.uuid));
+  if (!open.length) return;
+  queue.add(open.map(p => p.uuid));
+  ui.notifications.info(game.i18n.format("VTTTRANSLATE.Scene.AutoStarted", { name: app.document.name, count: open.length }));
+});
 
 // Änderungen an Seiten (auch von Hand) in der Zentrale nachziehen.
 Hooks.on("updateJournalEntryPage", () => {

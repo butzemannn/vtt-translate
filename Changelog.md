@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.0 – 2026-10-18
+
+- **Szene vorbereiten**: Kontextmenü an Szenen bzw. „Aktuelle Szene“ in der Zentrale wählt alle über Pins verlinkten Seiten aus, inkl. per Link verwiesener Seiten (z. B. Gegenstände); Kosten/Dauer sofort sichtbar
+- **Beim Öffnen übersetzen** (Einstellung, standardmäßig aus): offene Seiten eines Journals werden beim ersten Öffnen durch den GM im Hintergrund übersetzt
+
 ## 0.5.0 – 2026-10-12
 
 - Würfelangaben bleiben unverändert (`1d8` statt `1W8`): Regel im Prompt und Prüfung pro Absatz, sonst automatisch neu angefragt

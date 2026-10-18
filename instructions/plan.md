@@ -1,6 +1,6 @@
 # Plan: Foundry-Addon „vtt-translate“
 
-Status: **Phase 3 umgesetzt, Test offen**  ·  Stand: 2026-10-12
+Status: **Phase 4 umgesetzt, Test offen**  ·  Stand: 2026-10-12
 
 Ablage-System in `instructions/`:
 - `prompt.md`, `guidelines.md` – Vorgaben (nicht ändern)

@@ -1,6 +1,6 @@
 # Phase 3: Qualität + Prüfen
 
-Status: **umgesetzt (0.4.0) – Test in Foundry offen**  ·  Gesamtplan: `plan.md`
+Status: **abgeschlossen (0.5.0)**  ·  Gesamtplan: `plan.md`
 
 ## Ziel
 

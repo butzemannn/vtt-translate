@@ -13,6 +13,7 @@
 | `scripts/glossary.js` | Glossar: relevante Einträge je Seite, Vorschläge per LLM ([ADR 0005](adr/0005-glossar.md)) |
 | `scripts/ui/glossary-editor.js`, `templates/glossary/` | Glossar-Editor |
 | `scripts/ui/review.js`, `templates/review.hbs` | Prüf-Ansicht (Blöcke gepaart über `pairBlocks`) |
+| `scripts/scene.js` | Seiten einer Szene sammeln (Pins + verlinkte Seiten) |
 | `scripts/ui/windows.js` | Einzelinstanzen von Glossar und Prüf-Ansicht |
 | `scripts/translator.js` | Prompt, Anfrage, Prüfung, Wiederholung |
 | `scripts/html.js` | HTML in Blöcke zerlegen / zusammensetzen ([ADR 0003](adr/0003-blockweise-uebersetzung.md)) |

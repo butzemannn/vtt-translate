@@ -30,7 +30,8 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
       restore: TranslationCenter.#onRestore,
       glossary: () => openGlossary(),
       suggest: TranslationCenter.#onSuggest,
-      review: TranslationCenter.#onReview
+      review: TranslationCenter.#onReview,
+      scene: function () { this.prepareScene?.(); }
     }
   };
 
@@ -41,9 +42,11 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
   };
 
   /** @param {import("../queue.js").TranslationQueue} queue */
-  constructor(queue, options) {
+  /** @param {{prepareScene?: Function}} [hooks]  Rückruf für „Aktuelle Szene“ */
+  constructor(queue, { prepareScene } = {}, options) {
     super(options);
     this.queue = queue;
+    this.prepareScene = prepareScene;
     this.selected = new Set();
     this.expanded = new Set();
     this.collapsed = new Set();
@@ -51,6 +54,19 @@ export class TranslationCenter extends HandlebarsApplicationMixin(ApplicationV2)
     this.search = "";
     this.measures = new Map(); // uuid → {html, measure}, damit nicht bei jedem Rendern neu gezählt wird
     this.refresh = foundry.utils.debounce(() => this.rendered && this.render({ parts: ["list", "footer"] }), 300);
+  }
+
+  /** Auswahl ersetzen und die betroffenen Journale/Ordner aufklappen. */
+  selectOnly(uuids) {
+    this.selected = new Set(uuids);
+    this.filter = "all";
+    this.search = "";
+    for (const uuid of uuids) {
+      const entry = fromUuidSync(uuid)?.parent;
+      if (!entry) continue;
+      this.expanded.add(entry.id);
+      for (let folder = entry.folder; folder; folder = folder.folder) this.collapsed.delete(folder.id);
+    }
   }
 
   statusOf = page => this.queue.statusOf(page.uuid) ?? pageStatus(page);

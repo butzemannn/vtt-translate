@@ -11,6 +11,10 @@
       "ApiKey": {
         "Name": "API key",
         "Hint": "Key of the selected provider. Stored in this browser only."
+      },
+      "AutoTranslate": {
+        "Name": "Translate on open",
+        "Hint": "When the GM opens a journal with pages still in English, they are translated automatically in the background (uses API credit)."
       }
     },
     "Controls": {
@@ -112,6 +116,15 @@
       "Restore": "Original",
       "Edit": "Edit",
       "Approve": "Reviewed"
+    },
+    "Scene": {
+      "Prepare": "Prepare scene (translate)",
+      "Current": "Current scene",
+      "PrepareTooltip": "Selects all pages linked by pins on the active scene (including linked items).",
+      "NoScene": "No active scene.",
+      "NoPages": "No journal pages are linked on \"{name}\".",
+      "Prepared": "\"{name}\": {total} linked pages, {open} still to translate – selected.",
+      "AutoStarted": "\"{name}\": {count} pages are being translated in the background."
     }
   }
 }

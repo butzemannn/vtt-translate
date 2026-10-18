@@ -11,6 +11,10 @@
       "ApiKey": {
         "Name": "API-Key",
         "Hint": "Key des gewählten Anbieters. Wird nur in diesem Browser gespeichert."
+      },
+      "AutoTranslate": {
+        "Name": "Beim Öffnen übersetzen",
+        "Hint": "Öffnet der GM ein Journal mit noch englischen Seiten, werden diese automatisch im Hintergrund übersetzt (kostet API-Guthaben)."
       }
     },
     "Controls": {
@@ -112,6 +116,15 @@
       "Restore": "Original",
       "Edit": "Bearbeiten",
       "Approve": "Geprüft"
+    },
+    "Scene": {
+      "Prepare": "Szene vorbereiten (übersetzen)",
+      "Current": "Aktuelle Szene",
+      "PrepareTooltip": "Wählt alle Seiten aus, die auf der aktiven Szene über Pins verlinkt sind (inkl. verlinkter Gegenstände).",
+      "NoScene": "Keine aktive Szene.",
+      "NoPages": "Auf „{name}“ sind keine Journal-Seiten verlinkt.",
+      "Prepared": "„{name}“: {total} verlinkte Seiten, {open} noch zu übersetzen – ausgewählt.",
+      "AutoStarted": "„{name}“: {count} Seiten werden im Hintergrund übersetzt."
     }
   }
 }
